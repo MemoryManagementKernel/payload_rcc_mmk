@@ -13,14 +13,14 @@ int mmk_call(unsigned long id, unsigned long *args, unsigned int arglen, unsigne
 	unsigned long ret = 0;
 	unsigned long status = 0;
 	asm volatile(
-		"mv t3, %2 \n\t"
+		"mv x31, %2 \n\t"
 		"mv x17, %3 \n\t"
 		"mv x10, %4 \n\t"
 		"mv x11, %5 \n\t"
 		"mv x12, %6 \n\t"
 		"mv x13, %7 \n\t"
 		"mv x14, %8 \n\t"
-                "jalr x1, t3, 0 \n\t"
+                "jalr x1, x31, 0 \n\t"
                 "mv %0, a0 \n\t"
                 "mv %1, a1 \n\t"
                 : "=r" (ret), "=r" (status)
@@ -42,44 +42,72 @@ int nkapi_translate(unsigned long pt_handle, unsigned long vpn, unsigned char wr
 	return mmk_call(NKAPI_TRANSLATE, params, 3, ppn);
 }
 int nkapi_translate_va(unsigned long pt_handle, unsigned long va, unsigned long *pa){
-	return 0;
+    	unsigned long ppn;
+	retval = nkapi_translate(pt_handle, va >> 12, false, &ppn);
+	*pa = (ppn << 12) + (va & 0xfff);
+	return retval;
 }
 int nkapi_get_pte(unsigned long pt_handle, unsigned long vpn, unsigned long *pte){
-	return 0;
+	unsigned long params[2] = {pt_handle, vpn};
+	return mmk_call(NKAPI_GET_PTE, params, 2, pte);
 }
 int nkapi_fork_pte(unsigned long pt_handle, unsigned long vpn, unsigned char cow, unsigned long *ppn){
-	return 0;
+	unsigned long params[3] = {pt_handle, vpn, (unsigned long)cow};
+	return mmk_call(NKAPI_FORK_PTE, params, 3, ppn);
 }
+
+
 int nkapi_alloc(unsigned long pt_handle, unsigned long vpn, 
 	unsigned long map_type, unsigned long map_perm, unsigned long *ppn){
-	return 0;
+	unsigned long params[4] = {pt_handle, vpn, map_type, map_perm};
+	return mmk_call(NKAPI_ALLOC, params, 4, ppn);
 }
 int nkapi_dealloc(unsigned long pt_handle, unsigned long vpn){
-	return 0;
+	unsigned long abort;
+	unsigned long params[2] = {pt_handle, vpn};
+	return mmk_call(NKAPI_DEALLOC, params, 2, &abort);
 }
 int nkapi_pt_init(unsigned long pt_handle, unsigned char regenerate){
-	return 0;
+	unsigned long abort;
+	unsigned long params[2] = {pt_handle, (unsigned long)regenerate};
+	return mmk_call(NKAPI_PT_INIT, params, 2, &abort);
 }
 int nkapi_activate(unsigned long pt_handle){
-	return 0;
+	unsigned long abort;
+	unsigned long params[1] = {pt_handle};
+	return mmk_call(NKAPI_ACTIVATE, params, 1, &abort);
 }
 int nkapi_write(unsigned long pt_handle, unsigned long vpn, unsigned char *data, unsigned long offset){
-	return 0;
+	unsigned long abort;
+	unsigned long params[4] = {pt_handle, vpn, (unsigned long) data, offset};
+	return mmk_call(NKAPI_WRITE, params, 4, &abort);
 }
 int nkapi_set_permission(unsigned long pt_handle, unsigned long vpn, unsigned long map_perm){
-	return 0;
+	unsigned long abort;
+	unsigned long params[3] = {pt_handle, vpn, map_perm};
+	return mmk_call(NKAPI_SET_PERM, params, 3, &abort);
 }
 int nkapi_print_pt(unsigned long pt_handle, unsigned long from, unsigned long to){
-	return 0;
+	unsigned long abort;
+	unsigned long params[3] = {pt_handle, from, to};
+	return mmk_call(NKAPI_PRINT_PT, params, 3, &abort);
 }
 int nkapi_config_delegate_handler(unsigned long entry){
-	return 0;
+	unsigned long abort;
+	unsigned long params[2] = {NKCFG_DELEGATE, entry};
+	return mmk_call(NKAPI_CONFIG, params, 2, &abort);
 }
 int nkapi_config_signal_handler(unsigned long entry){
-	return 0;
+	unsigned long abort;
+	unsigned long params[2] = {NKCFG_SIGNAL, entry};
+	return mmk_call(NKAPI_CONFIG, params, 2, &abort);
 }
 int nkapi_config_allocator_range(unsigned long begin, unsigned long end){
-	return 0;
+	unsigned long abort;
+	unsigned long params1[2] = {NKCFG_ALLOCATOR_START, entry};
+	return mmk_call(NKAPI_CONFIG, params1, 2, &abort);
+	unsigned long params2[2] = {NKCFG_ALLOCATOR_END, entry};
+	return mmk_call(NKAPI_CONFIG, params2, 2, &abort);
 }
 
 
