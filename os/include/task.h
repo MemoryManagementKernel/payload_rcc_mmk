@@ -8,7 +8,6 @@
 #include "external.h"
 #include "fs.h"
 #include "mm.h"
-#include "mmk.h"
 #include "trap.h"
 
 #define TASK_STATUS_READY 0
@@ -109,7 +108,7 @@ uint64_t kernel_stack_get_top(KernelStack *ks);
 void processor_run_tasks();
 TaskControlBlock *processor_take_current_task();
 TaskControlBlock *processor_current_task();
-uint64_t processor_current_user_token();
+uint64_t processor_current_user_id();
 TrapContext *processor_current_trap_cx();
 void processor_schedule(TaskContext *switched_task_cx_ptr);
 

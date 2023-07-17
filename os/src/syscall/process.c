@@ -38,7 +38,7 @@ int64_t sys_open(char *path, uint32_t flags) {
   TaskControlBlock *task = processor_current_task();
 
   char file_name[NAME_LENGTH_LIMIT + 1];
-  copy_byte_buffer(processor_current_user_token(), (uint8_t *)file_name,
+  copy_byte_buffer(processor_current_user_id(), (uint8_t *)file_name,
                    (uint8_t *)path, NAME_LENGTH_LIMIT + 1, FROM_USER);
 
   int64_t fd = -1;
@@ -82,7 +82,7 @@ int64_t sys_close(uint64_t fd) {
 
 int64_t sys_pipe(uint64_t *pipe) {
   TaskControlBlock *task = processor_current_task();
-  uint64_t token = processor_current_user_token();
+  uint64_t token = processor_current_user_id();
 
   int64_t read_fd = task_control_block_alloc_fd(task);
   int64_t write_fd = task_control_block_alloc_fd(task);
@@ -173,7 +173,7 @@ int64_t sys_get_time(TimeVal *ts, int64_t tz) {
   int64_t time_us = timer_get_time_us();
   sys_ts.sec = time_us / USEC_PER_SEC;
   sys_ts.usec = time_us % USEC_PER_SEC;
-  copy_byte_buffer(processor_current_user_token(), (uint8_t *)&sys_ts,
+  copy_byte_buffer(processor_current_user_id(), (uint8_t *)&sys_ts,
                    (uint8_t *)ts, sizeof(TimeVal), TO_USER);
   return 0;
 }
@@ -213,7 +213,7 @@ int64_t sys_fork() {
 
 int64_t sys_exec(char *path) {
   char app_name[NAME_LENGTH_LIMIT + 1];
-  copy_byte_buffer(processor_current_user_token(), (uint8_t *)app_name,
+  copy_byte_buffer(processor_current_user_id(), (uint8_t *)app_name,
                    (uint8_t *)path, NAME_LENGTH_LIMIT + 1, FROM_USER);
 
   static uint8_t data[MAX_APP_SIZE];
@@ -280,7 +280,7 @@ int64_t sys_spawn(char *path) {
   TaskControlBlock *current_task = processor_current_task();
 
   char app_name[NAME_LENGTH_LIMIT + 1];
-  copy_byte_buffer(processor_current_user_token(), (uint8_t *)app_name,
+  copy_byte_buffer(processor_current_user_id(), (uint8_t *)app_name,
                    (uint8_t *)path, NAME_LENGTH_LIMIT + 1, FROM_USER);
 
   static uint8_t data[MAX_APP_SIZE];
@@ -313,7 +313,7 @@ int64_t sys_mailread(char *buf, uint64_t len) {
   }
 
   int64_t ret = copy_byte_buffer(
-      processor_current_user_token(),
+      processor_current_user_id(),
       (uint8_t *)task->mailbox.buffer[task->mailbox.read_mails % MAX_MAIL_NUM],
       (uint8_t *)buf, len, TO_USER);
   if (ret < 0) {
@@ -338,7 +338,7 @@ int64_t sys_mailwrite(int64_t pid, char *buf, uint64_t len) {
   }
 
   int64_t ret = copy_byte_buffer(
-      processor_current_user_token(),
+      processor_current_user_id(),
       (uint8_t *)task->mailbox.buffer[task->mailbox.write_mails % MAX_MAIL_NUM],
       (uint8_t *)buf, len, FROM_USER);
   if (ret < 0) {

@@ -59,8 +59,8 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
   uint64_t entry_point;
   memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp,
                       &entry_point);
-  s->trap_cx_ppn = (PhysPageNum)pte_ppn(*memory_set_translate(
-      &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT)));
+  s->trap_cx_ppn = memory_set_translate(
+      &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT));
 
   // alloc a pid and a kernel stack in kernel space
   s->pid = pid_alloc();
@@ -106,8 +106,8 @@ void task_control_block_exec(TaskControlBlock *s, uint8_t *elf_data,
                       &entry_point);
 
   // update trap_cx ppn
-  s->trap_cx_ppn = (PhysPageNum)pte_ppn(*memory_set_translate(
-      &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT)));
+  s->trap_cx_ppn = memory_set_translate(
+      &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT));
 
   // initialize trap_cx
   TrapContext *trap_cx = task_control_block_get_trap_cx(s);
@@ -121,8 +121,8 @@ TaskControlBlock *task_control_block_fork(TaskControlBlock *parent) {
 
   // copy user space (include trap context)
   memory_set_from_existed_user(&s->memory_set, &parent->memory_set);
-  s->trap_cx_ppn = (PhysPageNum)pte_ppn(*memory_set_translate(
-      &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT)));
+  s->trap_cx_ppn = memory_set_translate(
+      &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT));
 
   // alloc a pid and a kernel stack in kernel space
   s->pid = pid_alloc();
@@ -179,8 +179,8 @@ TaskControlBlock *task_control_block_spawn(TaskControlBlock *parent,
   kernel_stack_new(&s->kernel_stack, s->pid);
 
   // update trap_cx ppn
-  s->trap_cx_ppn = (PhysPageNum)pte_ppn(*memory_set_translate(
-      &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT)));
+  s->trap_cx_ppn = memory_set_translate(
+      &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT));
 
   // initialize trap_cx
   TrapContext *trap_cx = task_control_block_get_trap_cx(s);

@@ -59,7 +59,7 @@ int64_t pipe_read(Pipe *pipe, char *buf, uint64_t len) {
       break;
     size = MIN(MIN(len - i, pipe->write_bytes - pipe->read_bytes),
                PIPE_SIZE - (pipe->read_bytes % PIPE_SIZE));
-    copy_byte_buffer(processor_current_user_token(),
+    copy_byte_buffer(processor_current_user_id(),
                      (uint8_t *)&pipe->buffer[pipe->read_bytes % PIPE_SIZE],
                      (uint8_t *)buf + i, size, TO_USER);
     pipe->read_bytes += size;
@@ -84,7 +84,7 @@ int64_t pipe_write(Pipe *pipe, char *buf, uint64_t len) {
     } else {
       size = MIN(MIN(len - i, pipe->read_bytes + PIPE_SIZE - pipe->write_bytes),
                  PIPE_SIZE - (pipe->write_bytes % PIPE_SIZE));
-      copy_byte_buffer(processor_current_user_token(),
+      copy_byte_buffer(processor_current_user_id(),
                        (uint8_t *)&pipe->buffer[pipe->write_bytes % PIPE_SIZE],
                        (uint8_t *)buf + i, size, FROM_USER);
       pipe->write_bytes += size;

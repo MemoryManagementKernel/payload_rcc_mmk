@@ -96,7 +96,7 @@ int64_t inode_read(OSInode *osinode, char *buf, uint64_t len) {
   uint64_t read_size = 0;
   read_size = inode_read_at(&osinode->inode, osinode->offset,
                             (uint8_t *)FS_BUFFER, len);
-  copy_byte_buffer(processor_current_user_token(), FS_BUFFER,
+  copy_byte_buffer(processor_current_user_id(), FS_BUFFER,
                    (uint8_t *)FS_BUFFER, len, TO_USER);
   osinode->offset += read_size;
   return read_size;
@@ -105,7 +105,7 @@ int64_t inode_read(OSInode *osinode, char *buf, uint64_t len) {
 int64_t inode_write(OSInode *osinode, char *buf, uint64_t len) {
   len = MIN(len, FS_BUFFER_SIZE);
   uint64_t write_size = 0;
-  copy_byte_buffer(processor_current_user_token(), FS_BUFFER, (uint8_t *)buf,
+  copy_byte_buffer(processor_current_user_id(), FS_BUFFER, (uint8_t *)buf,
                    len, FROM_USER);
   write_size = inode_write_at(&osinode->inode, osinode->offset,
                               (uint8_t *)FS_BUFFER, len);

@@ -20,7 +20,7 @@ int64_t stdin_read(char *buf, uint64_t len) {
   }
 
   uint8_t ch = (uint8_t)c;
-  copy_byte_buffer(processor_current_user_token(), &ch, (uint8_t *)buf, 1,
+  copy_byte_buffer(processor_current_user_id(), &ch, (uint8_t *)buf, 1,
                    TO_USER);
   return 1;
 }
@@ -29,7 +29,7 @@ int64_t stdout_write(char *buf, uint64_t len) {
   static uint8_t stdout_write_buf[FS_BUFFER_SIZE];
 
   len = MIN(len, FS_BUFFER_SIZE);
-  copy_byte_buffer(processor_current_user_token(), stdout_write_buf,
+  copy_byte_buffer(processor_current_user_id(), stdout_write_buf,
                    (uint8_t *)buf, len, FROM_USER);
   for (uint64_t i = 0; i < len; i++) {
     console_putchar((char)stdout_write_buf[i]);

@@ -1,5 +1,6 @@
 #include "config.h"
 #include "mm.h"
+#include "mmk.h"
 
 void vpn_indexes(VirtPageNum vpn, uint64_t *idx) {
   for (int i = 2; i >= 0; i--) {

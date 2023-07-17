@@ -7,7 +7,7 @@
 #define KERNEL_STACK_SIZE (4096 * 2)
 #define KERNEL_HEAP_SIZE 0x300000
 #define MEMORY_END 0x81000000
-#define PAGE_SIZE 0x1000
+#define PAGE_SIZE 0x1000ul
 #define PAGE_SIZE_BITS 0xc
 #define PAGE_SHIFT 12
 

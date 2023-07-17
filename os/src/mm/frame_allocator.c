@@ -2,6 +2,7 @@
 #include "external.h"
 #include "log.h"
 #include "mm.h"
+#include "mmk.h"
 #include "string.h"
 
 typedef struct {

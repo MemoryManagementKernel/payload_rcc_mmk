@@ -1,17 +1,14 @@
 #ifndef _MM_H_
 #define _MM_H_
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
 #include "config.h"
 #include "external.h"
+#include "mmk.h"
 
 #define MMAP_MAX_SIZE (1 << 30) // 1 GB
 
 #define page_floor(x) ((x) / PAGE_SIZE)
-#define page_ceil(x) (((x)-1 + PAGE_SIZE) / PAGE_SIZE)
+#define page_ceil(x) (((x)-1ul + PAGE_SIZE) / PAGE_SIZE)
 #define page_offset(x) ((x) & (PAGE_SIZE - 1))
 #define page_aligned(x) (page_offset(x) == 0)
 #define addr2pn(x) page_floor(x)
@@ -26,23 +23,6 @@
 #define pte_writable(pte) (((pte)&PTE_W) != pte_empty())
 #define pte_executable(pte) (((pte)&PTE_X) != pte_empty())
 
-#define PTE_V (1L << 0)
-#define PTE_R (1L << 1)
-#define PTE_W (1L << 2)
-#define PTE_X (1L << 3)
-#define PTE_U (1L << 4)
-#define PTE_G (1L << 5)
-#define PTE_A (1L << 6)
-#define PTE_D (1L << 7)
-
-#define MAP_IDENTICAL 0
-#define MAP_FRAMED 1
-
-#define MAP_PERM_R PTE_R
-#define MAP_PERM_W PTE_W
-#define MAP_PERM_X PTE_X
-#define MAP_PERM_U PTE_U
-
 #define FROM_USER 0
 #define TO_USER 1
 
@@ -55,9 +35,6 @@ typedef struct {
   VirtPageNum l;
   VirtPageNum r;
 } VPNRange;
-
-typedef uint8_t MapType;
-typedef uint8_t MapPermission;
 
 typedef struct {
   VPNRange vpn_range;
@@ -116,8 +93,8 @@ void frame_allocator_print();
 // void page_table_unmap(PtHandle pt, VirtPageNum vpn);
 // PageTableEntry *page_table_translate(PtHandle pt, VirtPageNum vpn);
 // uint64_t page_table_token(PtHandle pt);
-// int64_t copy_byte_buffer(uint64_t token, uint8_t *kernel, uint8_t *user,
-//                          uint64_t len, uint64_t direction);
+int64_t copy_byte_buffer(uint64_t token, uint8_t *kernel, uint8_t *user,
+                          uint64_t len, uint64_t direction);
 
 // memory_set.c
 uint64_t memory_set_token(MemorySet *memory_set);
@@ -127,7 +104,7 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
                          uint64_t *entry_point);
 void memory_set_from_existed_user(MemorySet *memory_set, MemorySet *user_space);
 void memory_set_kernel_init();
-PageTableEntry *memory_set_translate(MemorySet *memory_set, VirtPageNum vpn);
+PhysPageNum memory_set_translate(MemorySet *memory_set, VirtPageNum vpn);
 void memory_set_recycle_data_pages(MemorySet *memory_set);
 void kernel_space_insert_framed_area(VirtAddr start_va, VirtAddr end_va,
                                      MapPermission permission);
@@ -136,6 +113,5 @@ uint64_t kernel_space_id();
 int64_t memory_set_mmap(MemorySet *memory_set, uint64_t start, uint64_t len,
                         uint64_t prot);
 int64_t memory_set_munmap(MemorySet *memory_set, uint64_t start, uint64_t len);
-void memory_set_remap_test();
 
 #endif // _MM_H_

@@ -130,7 +130,7 @@ extern void __restore();
 void trap_return() {
   set_user_trap_entry();
   uint64_t trap_cx_ptr = TRAP_CONTEXT;
-  uint64_t user_satp = processor_current_user_token();
+  uint64_t user_satp = processor_current_user_id();
   uint64_t restore_va = (uint64_t)__restore - (uint64_t)__alltraps + TRAMPOLINE;
   asm volatile("fence.i");
   asm volatile("mv x10, %1\n"

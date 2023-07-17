@@ -1,7 +1,6 @@
 #include "mmk.h"
 
-
-int mmk_call(unsigned long id, unsigned long *args, unsigned int arglen, unsigned long *retval)
+int mmk_call(unsigned long id, unsigned long *args, unsigned int arglen, uint64_t *retval)
 {
 	unsigned long vec[5] = {0,0,0,0,0};
 	for(int a = 0;a<5;a++){
@@ -42,7 +41,7 @@ int nkapi_translate(unsigned long pt_handle, VirtPageNum vpn, unsigned char writ
 	return mmk_call(NKAPI_TRANSLATE, params, 3, ppn);
 }
 int nkapi_translate_va(unsigned long pt_handle, VirtAddr va, PhysAddr *pa){
-    	unsigned long ppn;
+    PhysPageNum ppn;
 	unsigned long retval = nkapi_translate(pt_handle, va >> 12, 0, &ppn);
 	*pa = (ppn << 12) + (va & 0xfff);
 	return retval;
@@ -72,12 +71,18 @@ int nkapi_pt_init(unsigned long pt_handle, unsigned char regenerate){
 	unsigned long params[2] = {pt_handle, (unsigned long)regenerate};
 	return mmk_call(NKAPI_PT_INIT, params, 2, &abort);
 }
+int nkapi_pt_destroy(unsigned long pt_handle){
+	unsigned long abort;
+	unsigned long params[1] = {pt_handle};
+    return mmk_call(NKAPI_PT_DESTROY,pt_handle,1,&abort);
+}
+
 int nkapi_activate(unsigned long pt_handle){
 	unsigned long abort;
 	unsigned long params[1] = {pt_handle};
 	return mmk_call(NKAPI_ACTIVATE, params, 1, &abort);
 }
-int nkapi_write(unsigned long pt_handle, VirtPageNum vpn, unsigned char *data, unsigned long len, unsigned long offset){
+int nkapi_write(unsigned long pt_handle, VirtPageNum vpn, uint8_t *data, unsigned long len, unsigned long offset){
 	unsigned long abort;
 	unsigned long params[5] = {pt_handle, vpn, (unsigned long) data, len, offset};
 	return mmk_call(NKAPI_WRITE, params, 5, &abort);
