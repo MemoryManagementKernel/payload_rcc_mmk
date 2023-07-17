@@ -52,9 +52,9 @@ TaskControlBlock *processor_current_task() {
   return processor_current(&PROCESSOR);
 }
 
-uint64_t processor_current_user_token() {
+uint64_t processor_current_user_id() {
   TaskControlBlock *task = processor_current_task();
-  return task_control_block_get_user_token(task);
+  return task_control_block_get_user_id(task);
 }
 
 TrapContext *processor_current_trap_cx() {

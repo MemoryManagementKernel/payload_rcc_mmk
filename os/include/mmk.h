@@ -1,3 +1,5 @@
+#include "mmk_declare.h"
+
 ///////////////////////////////////
 /// 
 /// the value below is NK call number.
@@ -31,19 +33,18 @@ unsigned long NKCFG_ALLOCATOR_END = 4;
 ///////////////////////////////////
 
 
-
 int nkapi_time(unsigned long *time);
-int nkapi_translate(unsigned long pt_handle, unsigned long vpn, unsigned char write, unsigned long *ppn);
-int nkapi_translate_va(unsigned long pt_handle, unsigned long va, unsigned long *pa);
-int nkapi_get_pte(unsigned long pt_handle, unsigned long vpn, unsigned long *pte);
-int nkapi_fork_pte(unsigned long pt_handle, unsigned long vpn, unsigned char cow, unsigned long *ppn);
-int nkapi_alloc(unsigned long pt_handle, unsigned long vpn, 
-	unsigned long map_type, unsigned long map_perm, unsigned long *ppn);
-int nkapi_dealloc(unsigned long pt_handle, unsigned long vpn);
+int nkapi_translate(unsigned long pt_handle, VirtPageNum vpn, unsigned char write, PhysPageNum *ppn);
+int nkapi_translate_va(unsigned long pt_handle, VirtAddr va, PhysAddr *pa);
+int nkapi_get_pte(unsigned long pt_handle, VirtPageNum vpn, unsigned long *pte);
+int nkapi_fork_pte(unsigned long pt_handle, VirtPageNum vpn, unsigned char cow, PhysPageNum *ppn);
+int nkapi_alloc(unsigned long pt_handle, VirtPageNum vpn, 
+	MapType map_type, MapPermission map_perm, PhysPageNum *ppn);
+int nkapi_dealloc(unsigned long pt_handle, VirtPageNum vpn);
 int nkapi_pt_init(unsigned long pt_handle, unsigned char regenerate);
 int nkapi_activate(unsigned long pt_handle);
-int nkapi_write(unsigned long pt_handle, unsigned long vpn, unsigned char *data, unsigned long offset);
-int nkapi_set_permission(unsigned long pt_handle, unsigned long vpn, unsigned long map_perm);
+int nkapi_write(unsigned long pt_handle, VirtPageNum vpn, unsigned char *data, unsigned long len, unsigned long offset);
+int nkapi_set_permission(unsigned long pt_handle, VirtPageNum vpn, MapPermission map_perm);
 int nkapi_print_pt(unsigned long pt_handle, unsigned long from, unsigned long to);
 
 int nkapi_config_delegate_handler(unsigned long entry);

@@ -264,7 +264,7 @@ int64_t sys_waitpid(int64_t pid, int *exit_code_ptr) {
   if (task_child->task_status == TASK_STATUS_ZOMBIE) {
     task_control_block_free(task_child);
     vector_remove(&task->children, found_idx);
-    copy_byte_buffer(memory_set_token(&task->memory_set), (uint8_t *)&exit_code,
+    copy_byte_buffer(memory_set_id(&task->memory_set), (uint8_t *)&exit_code,
                      (uint8_t *)exit_code_ptr, sizeof(int), TO_USER);
     return (int64_t)found_pid;
   } else {

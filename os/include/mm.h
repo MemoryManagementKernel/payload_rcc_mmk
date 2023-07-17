@@ -46,14 +46,6 @@
 #define FROM_USER 0
 #define TO_USER 1
 
-typedef uint64_t PhysAddr;
-typedef uint64_t VirtAddr;
-typedef uint64_t PhysPageNum;
-typedef uint64_t VirtPageNum;
-
-typedef uint8_t PTEFlags;
-typedef uint64_t PageTableEntry;
-
 typedef struct {
   PhysPageNum root_ppn;
   struct vector frames;
@@ -73,8 +65,9 @@ typedef struct {
   MapPermission map_perm;
 } MapArea;
 
+//Yan_ice: need to be modified: PageTable -> PtHandle
 typedef struct {
-  PageTable page_table;
+  uint64_t page_table;
   struct vector areas;
 } MemorySet;
 
@@ -113,18 +106,18 @@ uint64_t frame_remaining_pages();
 void frame_allocator_print();
 
 // page_table.c
-void page_table_new(PageTable *pt);
-void page_table_free(PageTable *pt);
-void page_table_from_token(PageTable *pt, uint64_t satp);
-PageTableEntry *page_table_find_pte_create(PageTable *pt, VirtPageNum vpn);
-PageTableEntry *page_table_find_pte(PageTable *pt, VirtPageNum vpn);
-void page_table_map(PageTable *pt, VirtPageNum vpn, PhysPageNum ppn,
-                    PTEFlags flags);
-void page_table_unmap(PageTable *pt, VirtPageNum vpn);
-PageTableEntry *page_table_translate(PageTable *pt, VirtPageNum vpn);
-uint64_t page_table_token(PageTable *pt);
-int64_t copy_byte_buffer(uint64_t token, uint8_t *kernel, uint8_t *user,
-                         uint64_t len, uint64_t direction);
+// void page_table_new(PtHandle pt);
+// void page_table_free(PtHandle pt);
+// void page_table_from_token(PtHandle pt, uint64_t satp);
+// PageTableEntry *page_table_find_pte_create(PtHandle pt, VirtPageNum vpn);
+// PageTableEntry *page_table_find_pte(PtHandle pt, VirtPageNum vpn);
+// void page_table_map(PtHandle pt, VirtPageNum vpn, PhysPageNum ppn,
+//                     PTEFlags flags);
+// void page_table_unmap(PtHandle pt, VirtPageNum vpn);
+// PageTableEntry *page_table_translate(PtHandle pt, VirtPageNum vpn);
+// uint64_t page_table_token(PtHandle pt);
+// int64_t copy_byte_buffer(uint64_t token, uint8_t *kernel, uint8_t *user,
+//                          uint64_t len, uint64_t direction);
 
 // memory_set.c
 uint64_t memory_set_token(MemorySet *memory_set);
@@ -139,7 +132,7 @@ void memory_set_recycle_data_pages(MemorySet *memory_set);
 void kernel_space_insert_framed_area(VirtAddr start_va, VirtAddr end_va,
                                      MapPermission permission);
 void kernel_space_remove_area_with_start_vpn(VirtPageNum start_vpn);
-uint64_t kernel_space_token();
+uint64_t kernel_space_id();
 int64_t memory_set_mmap(MemorySet *memory_set, uint64_t start, uint64_t len,
                         uint64_t prot);
 int64_t memory_set_munmap(MemorySet *memory_set, uint64_t start, uint64_t len);

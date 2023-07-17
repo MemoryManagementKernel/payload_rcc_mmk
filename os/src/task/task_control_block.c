@@ -8,8 +8,8 @@ TrapContext *task_control_block_get_trap_cx(TaskControlBlock *s) {
   return (TrapContext *)pn2addr(s->trap_cx_ppn);
 }
 
-uint64_t task_control_block_get_user_token(TaskControlBlock *s) {
-  return memory_set_token(&s->memory_set);
+uint64_t task_control_block_get_user_id(TaskControlBlock *s) {
+  return memory_set_id(&s->memory_set);
 }
 
 int64_t task_control_block_alloc_fd(TaskControlBlock *s) {
@@ -77,7 +77,7 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
 
   // prepare TrapContext in user space
   TrapContext *trap_cx = task_control_block_get_trap_cx(s);
-  app_init_context(entry_point, user_sp, kernel_space_token(), kernel_stack_top,
+  app_init_context(entry_point, user_sp, kernel_space_id(), kernel_stack_top,
                    (uint64_t)trap_handler, trap_cx);
 
   memset(s->fd_table, 0, MAX_FILE_NUM * sizeof(File *));
@@ -112,7 +112,7 @@ void task_control_block_exec(TaskControlBlock *s, uint8_t *elf_data,
   // initialize trap_cx
   TrapContext *trap_cx = task_control_block_get_trap_cx(s);
   uint64_t kernel_stack_top = kernel_stack_get_top(&s->kernel_stack);
-  app_init_context(entry_point, user_sp, kernel_space_token(), kernel_stack_top,
+  app_init_context(entry_point, user_sp, kernel_space_id(), kernel_stack_top,
                    (uint64_t)trap_handler, trap_cx);
 }
 
@@ -185,7 +185,7 @@ TaskControlBlock *task_control_block_spawn(TaskControlBlock *parent,
   // initialize trap_cx
   TrapContext *trap_cx = task_control_block_get_trap_cx(s);
   uint64_t kernel_stack_top = kernel_stack_get_top(&s->kernel_stack);
-  app_init_context(entry_point, user_sp, kernel_space_token(), kernel_stack_top,
+  app_init_context(entry_point, user_sp, kernel_space_id(), kernel_stack_top,
                    (uint64_t)trap_handler, trap_cx);
 
   s->base_size = parent->base_size;

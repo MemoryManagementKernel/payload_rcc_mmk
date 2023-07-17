@@ -8,6 +8,7 @@
 #include "external.h"
 #include "fs.h"
 #include "mm.h"
+#include "mmk.h"
 #include "trap.h"
 
 #define TASK_STATUS_READY 0
@@ -72,7 +73,7 @@ MemorySet *task_current_memory_set();
 
 // task_control_block.c
 TrapContext *task_control_block_get_trap_cx(TaskControlBlock *s);
-uint64_t task_control_block_get_user_token(TaskControlBlock *s);
+uint64_t task_control_block_get_user_id(TaskControlBlock *s);
 int64_t task_control_block_alloc_fd(TaskControlBlock *s);
 void task_control_block_dealloc_fd(TaskControlBlock *s);
 void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
