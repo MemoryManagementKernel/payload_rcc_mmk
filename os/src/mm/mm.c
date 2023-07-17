@@ -3,8 +3,8 @@
 void mm_init() {
   // mm init
   heap_allocator_init();
-  frame_allocator_init();
   memory_set_kernel_init();
+  //frame_allocator_init();
 }
 
 int64_t copy_byte_buffer(uint64_t id, uint8_t *kernel, uint8_t *user,
@@ -26,5 +26,5 @@ int64_t copy_byte_buffer(uint64_t id, uint8_t *kernel, uint8_t *user,
 
 void mm_free() {
   // mm free
-  frame_allocator_free();
+  //frame_allocator_free();
 }

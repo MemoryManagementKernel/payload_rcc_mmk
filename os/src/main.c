@@ -16,6 +16,8 @@ void clear_bss() {
 }
 
 void main() {
+  info("Hello, world!\n");
+  shutdown();
   clear_bss();
 
   info("Hello, world!\n");

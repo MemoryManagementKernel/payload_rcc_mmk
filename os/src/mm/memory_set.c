@@ -139,6 +139,7 @@ static MemorySet KERNEL_SPACE;
 
 static void memory_set_new_kernel() {
   MemorySet *memory_set = &KERNEL_SPACE;
+  memory_set->page_table = 0;
   memory_set_new_bare(memory_set);
 
   // map trampoline

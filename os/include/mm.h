@@ -75,12 +75,13 @@ uint8_t *ppn_get_bytes_array(PhysPageNum ppn);
 void heap_allocator_init();
 
 // frame_allocator.c
-void frame_allocator_init();
-void frame_allocator_free();
-PhysPageNum frame_alloc();
-void frame_dealloc(PhysPageNum ppn);
-uint64_t frame_remaining_pages();
-void frame_allocator_print();
+// void frame_allocator_init();
+// void frame_allocator_free();
+// PhysPageNum frame_alloc();
+// void frame_dealloc(PhysPageNum ppn);
+// uint64_t frame_remaining_pages();
+// void frame_allocator_print();
+
 
 // page_table.c
 // void page_table_new(PtHandle pt);
