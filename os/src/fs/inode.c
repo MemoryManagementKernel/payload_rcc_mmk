@@ -28,9 +28,13 @@ static EasyFileSystem EFS;
 void inode_root_init() {
   BlockDevice *device = virtio_block_device_init();
   block_cache_manager_init();
+  info("cache manager init\n");
   efs_open(&EFS, device);
+  info("efs open \n");
   efs_root_inode(&ROOT_INODE, &EFS);
+  info("efs init \n");
   inode_list_apps();
+  info("apps init \n");
 }
 
 void inode_list_apps() {
@@ -109,7 +113,7 @@ int64_t inode_write(OSInode *osinode, char *buf, uint64_t len) {
                    len, FROM_USER);
   write_size = inode_write_at(&osinode->inode, osinode->offset,
                               (uint8_t *)FS_BUFFER, len);
-  assert(write_size == len);
+  assert(write_size == len, "wr size not len");
   osinode->offset += write_size;
   return write_size;
 }

@@ -10,7 +10,9 @@ static void block_cache_new(BlockCache *block_cache, uint64_t block_id,
   block_cache->block_id = block_id;
   block_cache->block_device = block_device;
   block_cache->modified = false;
+  info("ready read blk");
   block_cache->block_device->read_block(block_cache);
+  info("ready write blk");
 }
 
 static void block_cache_sync(BlockCache *block_cache) {
@@ -52,13 +54,19 @@ BlockCache *block_cache_get(uint64_t block_id, BlockDevice *block_device) {
       return b;
     }
   }
+    info("finding cache\n");
   // Not cached, recycle the least recently used (LRU) unused buffer
   for (BlockCache *b = BLOCK_CACHE_MANAGER.head.prev;
        b != &BLOCK_CACHE_MANAGER.head; b = b->prev) {
     if (b->ref == 0) {
+ info("find 1\n");
+
       block_cache_sync(b);
+
+       info("sync \n");
       block_cache_new(b, block_id, block_device);
       b->ref = 1;
+       info("return  \n");
       return b;
     }
   }

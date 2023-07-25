@@ -246,17 +246,22 @@ void virtio_disk_rw(BlockCache *b, int write) {
 
   // Wait for virtio_disk_intr() to say request has finished.
   BlockCache volatile *_b = b; // Make sure complier will load 'b' form memory
+  info("virtio_disk_rw 0 \n");
   intr_on();
+  info("virtio_disk_rw 1 \n");
   while (_b->disk) {
     // WARN: No kernel concurrent support, DO NOT allow kernel yield
     // yield();
   }
+      info("virtio_disk_rw 2 \n");
   intr_off();
+    info("virtio_disk_rw 3 \n");
   disk.info[idx[0]].b = 0;
   free_chain(idx[0]);
 }
 
 void virtio_disk_intr() {
+  info("virtio_disk_intr. \n");
   // the device won't raise another interrupt until we tell it
   // we've seen this interrupt, which the following line does.
   // this may race with the device writing new entries to

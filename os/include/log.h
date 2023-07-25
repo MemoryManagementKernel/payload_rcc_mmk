@@ -51,10 +51,10 @@
     shutdown();                                                                \
   } while (0)
 
-#define assert(cond)                                                           \
+#define assert(cond,mess)                                                           \
   do {                                                                         \
-    if (!(cond)) {                                                             \
-      panic("[ASSERT]\n");                                                     \
+    if (!(cond)) {                                                          \
+      panic("[ASSERT] %s\n",mess);                                                     \
     }                                                                          \
   } while (0)
 

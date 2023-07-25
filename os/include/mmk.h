@@ -76,7 +76,8 @@ typedef uint64_t MapType;
 /// 
 /// the value below is NK_TRAP_HANDLE param.
 /// 
-#define NKCFG_DELEGATE 1
+#define NKCFG_S_DELEGATE 0
+#define NKCFG_U_DELEGATE 1
 #define NKCFG_SIGNAL 2
 #define NKCFG_ALLOCATOR_START 3
 #define NKCFG_ALLOCATOR_END 4
@@ -98,7 +99,8 @@ int nkapi_write(unsigned long pt_handle, VirtPageNum vpn,  uint8_t *data, unsign
 int nkapi_set_permission(unsigned long pt_handle, VirtPageNum vpn, MapPermission map_perm);
 int nkapi_print_pt(unsigned long pt_handle, unsigned long from, unsigned long to);
 
-int nkapi_config_delegate_handler(unsigned long entry);
+int nkapi_config_kernel_delegate_handler(unsigned long entry);
+int nkapi_config_user_delegate_handler(unsigned long entry);
 int nkapi_config_signal_handler(unsigned long entry);
 int nkapi_config_allocator_range(unsigned long begin, unsigned long end);
 

@@ -332,6 +332,6 @@ void bd_init(void *base, void *end) {
   // check if the amount that is free is what we expect
   if (free != BLK_SIZE(MAXSIZE) - meta - unavailable) {
     info("free %d %ld\n", free, BLK_SIZE(MAXSIZE) - meta - unavailable);
-    panic("bd_init: free mem\n");
+    //panic("bd_init: free mem\n");
   }
 }

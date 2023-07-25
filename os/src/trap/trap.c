@@ -32,39 +32,30 @@ static void trap_from_kernel_interrupt(uint64_t cause) {
 void trap_from_kernel() {
   uint64_t scause = r_scause();
   uint64_t sstatus = r_sstatus();
-  uint64_t sepc = r_sepc();
   uint64_t stval = r_stval();
-
+  info("kernel trap handled\n");
   if ((sstatus & SSTATUS_SPP) == 0)
     panic("kernel trap: not from supervisor mode\n");
 
   if (scause & (1ULL << 63)) {
     trap_from_kernel_interrupt(scause & 0xff);
   } else {
-    panic("invalid kernel trap: scause = 0x%llx stval = 0x%llx sepc = 0x%llx\n",
-          scause, stval, sepc);
+    panic("invalid kernel trap: scause = 0x%llx stval = 0x%llx\n",
+          scause, stval);
   }
-
-  w_sepc(sepc);
-  w_sstatus(sstatus);
 }
 
 void kernelvec();
 
-static inline void set_kernel_trap_entry() {
-  // write to stvec - trap_from_kernel
-  w_stvec((uint64_t)kernelvec & ~0x3);
-}
-
-static inline void set_user_trap_entry() {
-  // write to stvec - TRAMPOLINE
-  w_stvec((uint64_t)TRAMPOLINE & ~0x3);
-}
 
 void trap_init() {
-  // Trap init
-  set_kernel_trap_entry();
+  nkapi_config_kernel_delegate_handler((uint64_t)trap_from_kernel);
+  nkapi_config_user_delegate_handler((uint64_t)trap_handler);
+
   w_sie(r_sie() | SIE_SEIE | SIE_SSIE);
+
+  //info("test kernel interrupt:\n");
+  //asm("csrr x10,mstatus");
 }
 
 void trap_enable_timer_interrupt() {
@@ -73,8 +64,7 @@ void trap_enable_timer_interrupt() {
 }
 
 void trap_handler() {
-  intr_off();
-  set_kernel_trap_entry();
+  //intr_off();
 
   TrapContext *cx = processor_current_trap_cx();
   uint64_t scause = r_scause();
@@ -120,15 +110,14 @@ void trap_handler() {
     }
   }
 
-  intr_on();
-  trap_return();
+  //intr_on();
+  //trap_return();
 }
 
 extern void __alltraps();
 extern void __restore();
 
 void trap_return() {
-  set_user_trap_entry();
   uint64_t trap_cx_ptr = TRAP_CONTEXT;
   uint64_t user_satp = processor_current_user_id();
   uint64_t restore_va = (uint64_t)__restore - (uint64_t)__alltraps + TRAMPOLINE;

@@ -1,4 +1,5 @@
 #include "mmk.h"
+#include "log.h"
 
 int mmk_call(unsigned long id, unsigned long *args, unsigned int arglen, uint64_t *retval)
 {
@@ -12,6 +13,7 @@ int mmk_call(unsigned long id, unsigned long *args, unsigned int arglen, uint64_
 	unsigned long ret = 0;
 	unsigned long status = 0;
 	asm volatile(
+		"fence.i \n\t"
 		"mv x31, %2 \n\t"
 		"mv x17, %3 \n\t"
 		"mv x10, %4 \n\t"
@@ -19,17 +21,21 @@ int mmk_call(unsigned long id, unsigned long *args, unsigned int arglen, uint64_
 		"mv x12, %6 \n\t"
 		"mv x13, %7 \n\t"
 		"mv x14, %8 \n\t"
-                "jalr x1, x31, 0 \n\t"
-                "mv %0, a0 \n\t"
-                "mv %1, a1 \n\t"
+        "jalr x1, x31, 0 \n\t"
+        "mv %0, a0 \n\t"
+        "mv %1, a1 \n\t"
+        "fence.i \n\t"
                 : "=r" (ret), "=r" (status)
                 : "r" (-0x1000), "r" (id*8),
                 "r" (vec[0]), "r" (vec[1]), "r" (vec[2]), "r" (vec[3]), "r" (vec[4])
+                : "x10","x11","x12","x13","x14","x17","x31"
             );
+        if(status!=0){
+        	warn("nkapi return non-0 status!\n");
+        }
         *retval = ret;
         return status;
 }
-
 
 int nkapi_time(unsigned long* time){
 	unsigned long params[5] = {0,0,0,0,0};
@@ -58,8 +64,8 @@ int nkapi_fork_pte(unsigned long pt_handle, VirtPageNum vpn, unsigned char cow, 
 
 int nkapi_alloc(unsigned long pt_handle, VirtPageNum vpn, 
 	MapType map_type, MapPermission map_perm, PhysPageNum *ppn){
-	unsigned long params[4] = {pt_handle, vpn, map_type, map_perm};
-	return mmk_call(NKAPI_ALLOC, params, 4, ppn);
+	unsigned long params[5] = {pt_handle, vpn, 1, map_type, map_perm};
+	return mmk_call(NKAPI_ALLOC, params, 5, ppn);
 }
 int nkapi_dealloc(unsigned long pt_handle, VirtPageNum vpn){
 	unsigned long abort;
@@ -93,9 +99,15 @@ int nkapi_set_permission(unsigned long pt_handle, VirtPageNum vpn, MapPermission
 	return mmk_call(NKAPI_SET_PERM, params, 3, &abort);
 }
 
-int nkapi_config_delegate_handler(unsigned long entry){
+int nkapi_config_user_delegate_handler(unsigned long entry){
 	unsigned long abort;
-	unsigned long params[2] = {NKCFG_DELEGATE, entry};
+	unsigned long params[2] = {NKCFG_U_DELEGATE, entry};
+	return mmk_call(NKAPI_CONFIG, params, 2, &abort);
+}
+
+int nkapi_config_kernel_delegate_handler(unsigned long entry){
+	unsigned long abort;
+	unsigned long params[2] = {NKCFG_S_DELEGATE, entry};
 	return mmk_call(NKAPI_CONFIG, params, 2, &abort);
 }
 int nkapi_config_signal_handler(unsigned long entry){
@@ -106,9 +118,14 @@ int nkapi_config_signal_handler(unsigned long entry){
 int nkapi_config_allocator_range(unsigned long begin, unsigned long end){
 	unsigned long abort;
 	unsigned long params1[2] = {NKCFG_ALLOCATOR_START, begin};
-	return mmk_call(NKAPI_CONFIG, params1, 2, &abort);
+	if( mmk_call(NKAPI_CONFIG, params1, 2, &abort) != 0){
+		return 1;
+	}
 	unsigned long params2[2] = {NKCFG_ALLOCATOR_END, end};
-	return mmk_call(NKAPI_CONFIG, params2, 2, &abort);
+	if( mmk_call(NKAPI_CONFIG, params2, 2, &abort) != 0){
+		return 1;
+	}
+	return 0;
 }
 
 

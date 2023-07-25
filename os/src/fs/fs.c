@@ -5,7 +5,7 @@
 #include "task.h"
 
 int64_t stdin_read(char *buf, uint64_t len) {
-  assert(len == 1);
+  assert(len == 1,"stdin len not 1");
 
   // busy loop
   uint64_t c;

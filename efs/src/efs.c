@@ -41,7 +41,7 @@ void efs_create(EasyFileSystem *efs, BlockDevice *device, uint32_t total_blocks,
 
   // write back immediately
   // create an inode for root node "/"
-  assert(efs_alloc_inode(efs) == 0);
+  assert(efs_alloc_inode(efs) == 0, "efs alloc inode failed");
   uint32_t root_inode_block_id = efs_get_disk_inode_id(efs, 0);
   uint64_t root_inode_offset = efs_get_disk_inode_offset(efs, 0);
   bc = block_cache_get(root_inode_block_id, device);
@@ -58,8 +58,7 @@ void efs_open(EasyFileSystem *efs, BlockDevice *device) {
   SuperBlock *sb;
   bc = block_cache_get(0, device);
   sb = (SuperBlock *)bc->cache;
-
-  assert(super_block_is_valid(sb));
+  assert(super_block_is_valid(sb),"blk not valid");
   uint32_t inode_total_blocks = sb->inode_bitmap_blocks + sb->inode_area_blocks;
 
   bitmap_new(&efs->inode_bitmap, 1, sb->inode_bitmap_blocks);
@@ -67,8 +66,9 @@ void efs_open(EasyFileSystem *efs, BlockDevice *device) {
   efs->inode_area_start_block = 1 + sb->inode_bitmap_blocks;
   efs->data_area_start_block = 1 + inode_total_blocks + sb->data_bitmap_blocks;
   efs->block_device = device;
-
+  info("b3\n");
   block_cache_release(bc);
+  info("b4\n");
 }
 
 void efs_root_inode(Inode *inode, EasyFileSystem *efs) {

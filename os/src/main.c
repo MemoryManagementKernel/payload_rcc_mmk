@@ -7,7 +7,7 @@
 #include "timer.h"
 #include "trap.h"
 
-extern uint8_t sbss, ebss;
+extern uint8_t sbss, ebss, ekernel;
 
 void clear_bss() {
   for (uint8_t *i = &sbss; i < &ebss; i++) {
@@ -16,18 +16,23 @@ void clear_bss() {
 }
 
 void main() {
-  info("Hello, world!\n");
-  shutdown();
-  clear_bss();
+  //clear_bss();
+  nkapi_config_allocator_range((unsigned long)&ekernel, 0x88000000);
 
-  info("Hello, world!\n");
+  info("rcc_mmk init.\n");
 
   mm_init();
+  info("Memory init success.\n");
 
   trap_init();
+  info("Trap init success.\n");
 
   plic_init();
+  info("Plic init success.\n");
 
+  //int *c = (int*)0x80300000;
+  //*c = 1;
+  
   inode_root_init();
 
   task_init();
