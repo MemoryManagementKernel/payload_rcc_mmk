@@ -8,6 +8,7 @@
   .section .text
   .globl __switch
 __switch:
+  # ra sp s[12]
   # __switch(
   #     current_task_cx_ptr: *mut TaskContext,
   #     next_task_cx_ptr: *const TaskContext

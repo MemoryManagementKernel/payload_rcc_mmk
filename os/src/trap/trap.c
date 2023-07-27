@@ -118,6 +118,7 @@ extern void __alltraps();
 extern void __restore();
 
 void trap_return() {
+  info("in trap return\n");
   uint64_t trap_cx_ptr = TRAP_CONTEXT;
   uint64_t user_satp = processor_current_user_id();
   uint64_t restore_va = (uint64_t)__restore - (uint64_t)__alltraps + TRAMPOLINE;

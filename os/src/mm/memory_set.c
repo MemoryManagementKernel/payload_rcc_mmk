@@ -33,8 +33,12 @@ static void map_area_unmap_one(MapArea *map_area, PtHandle pt,
 }
 
 static void map_area_map(MapArea *map_area, PtHandle pt) {
+  if(pt == 1){
+    // panic("1\n");
+  }
   for (VirtPageNum vpn = map_area->vpn_range.l; vpn < map_area->vpn_range.r;
        vpn++) {
+    
     map_area_map_one(map_area, pt, vpn);
   }
 }
@@ -64,6 +68,7 @@ static void map_area_copy_data(MapArea *map_area, PtHandle pt, uint8_t *data,
 }
 
 static void memory_set_new_bare(MemorySet *memory_set) {
+  info("pid new here\n");
   nkapi_pt_init(memory_set->page_table, 0);
   vector_new(&memory_set->areas, sizeof(MapArea));
 }
@@ -74,6 +79,7 @@ uint64_t memory_set_id(MemorySet *memory_set) {
 
 static void memory_set_push(MemorySet *memory_set, MapArea *map_area,
                             uint8_t *data, uint64_t len) {
+
   map_area_map(map_area, memory_set->page_table);
   if (data && len >= 0) {
     map_area_copy_data(map_area, memory_set->page_table, data, len);
@@ -88,7 +94,8 @@ static void memory_set_insert_framed_area(MemorySet *memory_set,
   MapArea map_area;
   map_area.vpn_range.l = page_floor(start_va);
   map_area.vpn_range.r = page_ceil(end_va);
-  map_area.map_type = MAP_FRAMED;
+  // map_area.map_type = MAP_FRAMED;
+  map_area.map_type = 0xfffffffffffffffdul;
   map_area.map_perm = permission;
   memory_set_push(memory_set, &map_area, NULL, 0);
 }
@@ -149,7 +156,8 @@ static void memory_set_new_kernel() {
   info(".text      [0x%llx, 0x%llx)\n", &stext, &etext);
   info(".rodata    [0x%llx, 0x%llx)\n", &srodata, &erodata);
   info(".data      [0x%llx, 0x%llx)\n", &sdata, &edata);
-  info("boot_stack [0x%llx, 0x%llx)\n", &sbss_with_stack, &ebss);
+  info(".bss       [0x%llx, 0x%llx)\n", &sbss_with_stack, &ebss);
+  info(".physical memory  [0x%llx, 0x%llx)\n", &ekernel, 0x81000000);
 
   MapArea map_area;
 
@@ -208,11 +216,11 @@ static void memory_set_new_kernel() {
 void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
                          size_t elf_size, uint64_t *user_sp,
                          uint64_t *entry_point) {
+
   memory_set_new_bare(memory_set);
 
   // map trampoline
-  memory_set_map_trampoline(memory_set);
-
+  // memory_set_map_trampoline(memory_set);
   // map progam headers of elf, with U flag
   t_elf elf;
   int elf_load_ret = elf_load(elf_data, elf_size, &elf);
@@ -226,6 +234,9 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
   uint64_t ph_flags;
   MapArea map_area;
   VirtPageNum max_end_vpn = 0;
+  
+  // panic("stop here\n");
+  
   for (size_t i = 0; i < ph_count; i++) {
     t_elf_program *ph = &elf.programs[i];
     if (elf_program_get_type(&elf, ph) == PT_LOAD) {
@@ -244,9 +255,11 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
       }
       map_area.vpn_range.l = page_floor(start_va);
       map_area.vpn_range.r = page_ceil(end_va);
-      map_area.map_type = MAP_FRAMED;
+      // map_area.map_type = MAP_FRAMED;
+      map_area.map_type = 0xfffffffffffffffdul;
       map_area.map_perm = map_perm;
       max_end_vpn = map_area.vpn_range.r;
+      // panic("stop here\n");
       memory_set_push(memory_set, &map_area,
                       elf_data + elf_program_get_offset(&elf, ph),
                       elf_program_get_filesz(&elf, ph));
@@ -260,15 +273,18 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
   user_stack_bottom += PAGE_SIZE;
   VirtAddr user_stack_top = user_stack_bottom + USER_STACK_SIZE;
   map_area.vpn_range.l = page_floor(user_stack_bottom);
-  map_area.vpn_range.r = page_ceil(user_stack_top);
-  map_area.map_type = MAP_FRAMED;
+  map_area.vpn_range.r = page_ceil(user_stack_top) + 1;
+  // map_area.map_type = MAP_FRAMED;
+  map_area.map_type = 0xfffffffffffffffdul;
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W | MAP_PERM_U;
   memory_set_push(memory_set, &map_area, NULL, 0);
 
+  info("map trap context\n");
   // map TrapContext
   map_area.vpn_range.l = page_floor(TRAP_CONTEXT);
-  map_area.vpn_range.r = page_ceil(TRAMPOLINE);
-  map_area.map_type = MAP_FRAMED;
+  map_area.vpn_range.r = page_ceil(TRAP_CONTEXT) + 1;
+  // map_area.map_type = MAP_FRAMED;
+  map_area.map_type = 0xfffffffffffffffdul;
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
   memory_set_push(memory_set, &map_area, NULL, 0);
 

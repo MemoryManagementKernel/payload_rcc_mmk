@@ -40,7 +40,6 @@ typedef struct TaskControlBlock TaskControlBlock;
 struct TaskControlBlock {
   PidHandle pid;
   KernelStack kernel_stack;
-
   PhysPageNum trap_cx_ppn;
   uint64_t base_size;
   TaskContext task_cx;

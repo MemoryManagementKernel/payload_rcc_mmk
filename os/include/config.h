@@ -11,8 +11,8 @@
 #define PAGE_SIZE_BITS 0xc
 #define PAGE_SHIFT 12
 
-#define TRAMPOLINE (UINT64_MAX - PAGE_SIZE + 1)
-#define TRAP_CONTEXT (TRAMPOLINE - PAGE_SIZE)
+#define TRAMPOLINE (UINT64_MAX - 2 * PAGE_SIZE + 1)
+#define TRAP_CONTEXT (INT32_MAX- PAGE_SIZE + 1)
 
 #define APP_BASE_ADDRESS 0x80400000
 #define APP_SIZE_LIMIT 0x20000
@@ -20,8 +20,10 @@
 #define MAX_APP_SIZE (1024 * 1024)
 
 // kernel stack in kernel space
+// #define kernel_stack_position_top(x)                                           \
+//   (TRAMPOLINE - (x) * (KERNEL_STACK_SIZE + PAGE_SIZE))
 #define kernel_stack_position_top(x)                                           \
-  (TRAMPOLINE - (x) * (KERNEL_STACK_SIZE + PAGE_SIZE))
+  (TRAP_CONTEXT - (x) * (KERNEL_STACK_SIZE + PAGE_SIZE))
 #define kernel_stack_position_bottom(x)                                        \
   (kernel_stack_position_top(x) - KERNEL_STACK_SIZE)
 

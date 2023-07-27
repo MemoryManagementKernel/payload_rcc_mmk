@@ -37,9 +37,9 @@ void main() {
 
   task_init();
 
-  trap_enable_timer_interrupt();
+  // trap_enable_timer_interrupt();
 
-  timer_set_next_trigger();
+  // timer_set_next_trigger();
 
   processor_run_tasks();
 

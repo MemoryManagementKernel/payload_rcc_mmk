@@ -44,7 +44,7 @@ typedef uint64_t MapType;
 
 #define MAP_IDENTICAL 0xfffffffffffffffeul
 #define MAP_FRAMED 0xfffffffffffffffdul
-#define MAP_FRAMED 0xfffffffffffffffcul
+#define MAP_RAW 0xfffffffffffffffcul
 #define MAP_SPECIFIED(x) ((uint64_t)x)
 
 

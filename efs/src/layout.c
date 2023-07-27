@@ -62,7 +62,7 @@ uint32_t disk_inode_total_blocks(uint32_t size) {
 }
 
 uint32_t disk_inode_blocks_num_needed(DiskInode *d, uint32_t new_size) {
-  assert(new_size > d->size);
+  assert(new_size > d->size, "");
   return disk_inode_total_blocks(new_size) - disk_inode_total_blocks(d->size);
 }
 
@@ -226,7 +226,7 @@ void disk_inode_clear_size(DiskInode *d, uint32_t *v, BlockDevice *device) {
   }
 
   // indirect2
-  assert(data_blocks <= INODE_INDIRECT2_COUNT);
+  assert(data_blocks <= INODE_INDIRECT2_COUNT, "");
   uint64_t a1 = data_blocks / INODE_INDIRECT1_COUNT;
   uint64_t b1 = data_blocks % INODE_INDIRECT1_COUNT;
   bc2 = block_cache_get(d->indirect1, device);
@@ -302,7 +302,7 @@ uint64_t disk_inode_write_at(DiskInode *d, uint64_t offset, uint8_t *buf,
                              uint64_t len, BlockDevice *device) {
   uint64_t start = offset;
   uint64_t end = MIN(d->size, offset + len);
-  assert(start <= end);
+  assert(start <= end, "");
   uint64_t start_block = start / BLOCK_SZ;
   uint64_t write_size = 0;
   uint64_t end_current_block, block_write_size;

@@ -52,7 +52,7 @@ void bitmap_dealloc(Bitmap *b, BlockDevice *device, uint64_t bit) {
   BlockCache *bc = block_cache_get(block_pos + b->start_block_id, device);
   bc->modified = true;
   BitmapBlock *bitmap_block = (BitmapBlock *)bc->cache;
-  assert((bitmap_block[bits64_pos] & (1ULL << inner_pos)) != 0);
+  assert((bitmap_block[bits64_pos] & (1ULL << inner_pos)) != 0, "");
   bitmap_block[bits64_pos] -= (1ULL << inner_pos);
   block_cache_release(bc);
 }

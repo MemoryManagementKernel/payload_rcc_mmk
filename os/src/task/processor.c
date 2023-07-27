@@ -1,4 +1,5 @@
 #include "task.h"
+#include "log.h"
 
 extern void __switch(TaskContext *current_task_cx_ptr,
                      const TaskContext *next_task_cx_ptr);
@@ -39,6 +40,7 @@ void processor_run_tasks() {
       next_task_cx_ptr = &task->task_cx;
       task->task_status = TASK_STATUS_RUNNING;
       PROCESSOR.current = task;
+      info("before switch\n");
       __switch(idle_task_cx_ptr, next_task_cx_ptr);
     }
   }

@@ -7,7 +7,7 @@
 static uint32_t inode_find_inode_id(Inode *inode, char *name,
                                     DiskInode *disk_inode) {
   // assert it is a directory
-  assert(disk_inode_is_dir(disk_inode));
+  assert(disk_inode_is_dir(disk_inode), "");
   uint64_t file_count = disk_inode->size / DIRENT_SZ;
 
   DirEntry dirent;
@@ -15,7 +15,7 @@ static uint32_t inode_find_inode_id(Inode *inode, char *name,
 
   for (uint64_t i = 0; i < file_count; i++) {
     assert(disk_inode_read_at(disk_inode, DIRENT_SZ * i, (uint8_t *)&dirent,
-                              DIRENT_SZ, inode->block_device) == DIRENT_SZ);
+                              DIRENT_SZ, inode->block_device) == DIRENT_SZ, "");
     if (strcmp(dirent.name, name) == 0) {
       return dirent.inode_number;
     }
@@ -76,7 +76,7 @@ int64_t inode_create(Inode *inode, char *name, Inode *inode_created) {
   bc = block_cache_get(inode->block_id, inode->block_device);
   DiskInode *root_inode = (DiskInode *)(bc->cache + inode->block_offset);
   // assert it is a directory
-  assert(disk_inode_is_dir(root_inode));
+  assert(disk_inode_is_dir(root_inode), "");
   // has the file been created?
   uint32_t inode_id = inode_find_inode_id(inode, name, root_inode);
   block_cache_release(bc);
@@ -129,7 +129,7 @@ void inode_ls(Inode *inode, char **v) {
   dir_entry_empty(&dirent);
   for (uint64_t i = 0; i < file_count; i++) {
     assert(disk_inode_read_at(di, i * DIRENT_SZ, (uint8_t *)&dirent, DIRENT_SZ,
-                              inode->block_device) == DIRENT_SZ);
+                              inode->block_device) == DIRENT_SZ, "");
     strcpy(v[i], dirent.name);
   }
   block_cache_release(bc);
@@ -176,7 +176,7 @@ void inode_clear(Inode *inode) {
   uint32_t *data_blocks_dealloc =
       MALLOC(sizeof(uint32_t) * data_blocks_dealloc_len);
   disk_inode_clear_size(di, data_blocks_dealloc, inode->block_device);
-  assert(data_blocks_dealloc_len == disk_inode_total_blocks(size));
+  assert(data_blocks_dealloc_len == disk_inode_total_blocks(size), "");
   for (uint64_t i = 0; i < data_blocks_dealloc_len; i++) {
     efs_dealloc_data(fs, data_blocks_dealloc[i]);
   }

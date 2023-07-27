@@ -3,6 +3,7 @@
 #include "config.h"
 #include "string.h"
 #include "task.h"
+#include "log.h"
 
 TrapContext *task_control_block_get_trap_cx(TaskControlBlock *s) {
   return (TrapContext *)pn2addr(s->trap_cx_ppn);
@@ -57,16 +58,24 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
   // memory_set with elf program headers/trampoline/trap context/user stack
   uint64_t user_sp;
   uint64_t entry_point;
+
+  s->pid = pid_alloc();
+  s->memory_set.page_table = s->pid;
+
+  info("map from elf begin\n");
+
   memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp,
                       &entry_point);
+
+  info("map from elf over\n");
+
   s->trap_cx_ppn = memory_set_translate(
       &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT));
-
+  info("trap context ppn is 0x%llx\n", s->trap_cx_ppn);
   // alloc a pid and a kernel stack in kernel space
-  s->pid = pid_alloc();
+  // panic("stop here\n");
   kernel_stack_new(&s->kernel_stack, s->pid);
   uint64_t kernel_stack_top = kernel_stack_get_top(&s->kernel_stack);
-
   // push a task context which goes to trap_return to the top of kernel stack
   s->base_size = user_sp;
   task_context_goto_trap_return(&s->task_cx, kernel_stack_top);
@@ -75,13 +84,24 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
   vector_new(&s->children, sizeof(TaskControlBlock *));
   s->exit_code = 0;
 
+  // panic("stop here\n");
+
   // prepare TrapContext in user space
+  // identical mapping, so directly set trap context in physical address
   TrapContext *trap_cx = task_control_block_get_trap_cx(s);
+  info("task control block start address is 0x%llx\n", &s);
+  // info("task control block kernel stack address is 0x%llx\n", &(s->kernel_stack));
+  // info("task control block end address is 0x%llx\n", &(s->stride));
+  info("trap context address is 0x%llx\n", trap_cx);
+  // panic("stop here\n");
+
   app_init_context(entry_point, user_sp, kernel_space_id(), kernel_stack_top,
                    (uint64_t)trap_handler, trap_cx);
-
+  // panic("stop here\n");
   memset(s->fd_table, 0, MAX_FILE_NUM * sizeof(File *));
   memset(&s->mailbox, 0, sizeof(Mailbox));
+
+  // panic("stop here\n");
 
   s->priority = DEFAULT_PRIORITY;
   s->stride = 0;
