@@ -157,7 +157,7 @@ static void memory_set_new_kernel() {
   info(".rodata    [0x%llx, 0x%llx)\n", &srodata, &erodata);
   info(".data      [0x%llx, 0x%llx)\n", &sdata, &edata);
   info(".bss       [0x%llx, 0x%llx)\n", &sbss_with_stack, &ebss);
-  info(".physical memory  [0x%llx, 0x%llx)\n", &ekernel, 0x81000000);
+  info(".physical memory  [0x%llx, 0x%llx)\n", &ekernel, 0x81000000ul);
 
   MapArea map_area;
 
@@ -255,8 +255,7 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
       }
       map_area.vpn_range.l = page_floor(start_va);
       map_area.vpn_range.r = page_ceil(end_va);
-      // map_area.map_type = MAP_FRAMED;
-      map_area.map_type = 0xfffffffffffffffdul;
+      map_area.map_type = MAP_FRAMED;
       map_area.map_perm = map_perm;
       max_end_vpn = map_area.vpn_range.r;
       // panic("stop here\n");
@@ -274,8 +273,9 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
   VirtAddr user_stack_top = user_stack_bottom + USER_STACK_SIZE;
   map_area.vpn_range.l = page_floor(user_stack_bottom);
   map_area.vpn_range.r = page_ceil(user_stack_top) + 1;
-  // map_area.map_type = MAP_FRAMED;
-  map_area.map_type = 0xfffffffffffffffdul;
+
+  info("map usr stack: %llx %llx\n", user_stack_bottom, user_stack_top);
+  map_area.map_type = MAP_FRAMED;
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W | MAP_PERM_U;
   memory_set_push(memory_set, &map_area, NULL, 0);
 
@@ -283,8 +283,7 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
   // map TrapContext
   map_area.vpn_range.l = page_floor(TRAP_CONTEXT);
   map_area.vpn_range.r = page_ceil(TRAP_CONTEXT) + 1;
-  // map_area.map_type = MAP_FRAMED;
-  map_area.map_type = 0xfffffffffffffffdul;
+  map_area.map_type = MAP_FRAMED;
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
   memory_set_push(memory_set, &map_area, NULL, 0);
 

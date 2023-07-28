@@ -19,7 +19,7 @@ void main() {
   //clear_bss();
   nkapi_config_allocator_range((unsigned long)&ekernel, 0x88000000);
 
-  info("rcc_mmk init.\n");
+  info("rcc_mmk init 1.\n");
 
   mm_init();
   info("Memory init success.\n");

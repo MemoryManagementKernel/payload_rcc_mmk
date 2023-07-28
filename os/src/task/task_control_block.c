@@ -71,7 +71,7 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
 
   s->trap_cx_ppn = memory_set_translate(
       &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT));
-  info("trap context ppn is 0x%llx\n", s->trap_cx_ppn);
+  info("trap context ppn of [%d] is 0x%llx\n", s->pid, s->trap_cx_ppn);
   // alloc a pid and a kernel stack in kernel space
   // panic("stop here\n");
   kernel_stack_new(&s->kernel_stack, s->pid);
