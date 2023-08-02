@@ -259,6 +259,12 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
       map_area.map_perm = map_perm;
       max_end_vpn = map_area.vpn_range.r;
       // panic("stop here\n");
+      info("elf map: file %lx -> mem %lx\n",elf_program_get_offset(&elf, ph),
+         map_area.vpn_range.l);
+      for(int i = 0;i<50;i++){
+        printf("%lx ",elf_data[elf_program_get_offset(&elf, ph)+i]);
+      }
+      info("[head]\n");
       memory_set_push(memory_set, &map_area,
                       elf_data + elf_program_get_offset(&elf, ph),
                       elf_program_get_filesz(&elf, ph));

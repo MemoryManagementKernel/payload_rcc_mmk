@@ -98,6 +98,7 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
   app_init_context(entry_point, user_sp, kernel_space_id(), kernel_stack_top,
                    (uint64_t)trap_handler, trap_cx);
   // panic("stop here\n");
+  info("entry point: %lx\n",entry_point);
   memset(s->fd_table, 0, MAX_FILE_NUM * sizeof(File *));
   memset(&s->mailbox, 0, sizeof(Mailbox));
 

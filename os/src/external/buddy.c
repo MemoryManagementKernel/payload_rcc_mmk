@@ -286,6 +286,7 @@ void bd_init(void *base, void *end) {
 
   // compute the number of sizes we need to manage [base, end)
   nsizes = _log2(((char *)end - p) / LEAF_SIZE) + 1;
+
   if ((char *)end - p > BLK_SIZE(MAXSIZE)) {
     nsizes++; // round up to the next power of 2
   }
@@ -332,6 +333,6 @@ void bd_init(void *base, void *end) {
   // check if the amount that is free is what we expect
   if (free != BLK_SIZE(MAXSIZE) - meta - unavailable) {
     info("free %d %ld\n", free, BLK_SIZE(MAXSIZE) - meta - unavailable);
-    //panic("bd_init: free mem\n");
+    panic("bd_init: free mem\n");
   }
 }

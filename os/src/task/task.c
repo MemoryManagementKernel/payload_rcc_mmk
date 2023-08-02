@@ -14,6 +14,7 @@ void task_init() {
   if (!INITPROC.elf_inode) {
     panic("Fail to create initproc\n");
   }
+  info("create initproc\n");
   uint64_t initproc_elf_size = inode_read_all(INITPROC.elf_inode, initproc_elf);
   // panic("unreachable task init\n");
   task_control_block_new(&INITPROC, initproc_elf, initproc_elf_size);

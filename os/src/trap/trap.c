@@ -33,11 +33,13 @@ void trap_from_kernel() {
   uint64_t scause = r_scause();
   uint64_t sstatus = r_sstatus();
   uint64_t stval = r_stval();
-  info("kernel trap handled\n");
+  
   if ((sstatus & SSTATUS_SPP) == 0)
     panic("kernel trap: not from supervisor mode\n");
 
   if (scause & (1ULL << 63)) {
+    info("kernel trap handled: scause = 0x%llx stval = 0x%llx\n",
+          scause, stval);
     trap_from_kernel_interrupt(scause & 0xff);
   } else {
     panic("invalid kernel trap: scause = 0x%llx stval = 0x%llx\n",
@@ -65,7 +67,7 @@ void trap_enable_timer_interrupt() {
 
 void trap_handler() {
   //intr_off();
-
+  info("user trap handled\n");
   TrapContext *cx = processor_current_trap_cx();
   uint64_t scause = r_scause();
   uint64_t stval = r_stval();

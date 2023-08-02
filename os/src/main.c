@@ -35,6 +35,10 @@ void main() {
   
   inode_root_init();
 
+  unsigned long val;
+  asm("mv %0, sp"
+  : "=r" (val));
+  info("sp value: %lx \n", val);
   task_init();
 
   // trap_enable_timer_interrupt();
