@@ -58,13 +58,22 @@ static void map_area_copy_data(MapArea *map_area, PtHandle pt, uint8_t *data,
   for (;;) {
     uint8_t *src = &data[start];
     uint64_t cpy_len = (len - start >= PAGE_SIZE) ? PAGE_SIZE : (len - start);
-    nkapi_write(pt, current_vpn, src, cpy_len, 0);
-    start += PAGE_SIZE;
-    if (start >= len) {
-      break;
+    // nkapi_write(pt, current_vpn, src, cpy_len, 0);
+    info("need to copy %d\n", cpy_len);
+    nkapi_activate(pt);
+    info("vpn is %d\n", current_vpn);
+    uint64_t current_va = current_vpn * PAGE_SIZE + 0; 
+    for (int i = 0; i < cpy_len; i++){
+      // info("write to %lx is %lx\n", current_va + i, *(src + i));
+      *((uint8_t*) (current_va + i)) = *(src + i);      }
+      info("\n");
+      nkapi_activate(0);
+      start += PAGE_SIZE;
+      if (start >= len) {
+        break;
+      }
+      current_vpn += 1;
     }
-    current_vpn += 1;
-  }
 }
 
 static void memory_set_new_bare(MemorySet *memory_set) {
@@ -236,7 +245,6 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
   VirtPageNum max_end_vpn = 0;
   
   // panic("stop here\n");
-  
   for (size_t i = 0; i < ph_count; i++) {
     t_elf_program *ph = &elf.programs[i];
     if (elf_program_get_type(&elf, ph) == PT_LOAD) {

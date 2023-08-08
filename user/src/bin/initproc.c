@@ -4,6 +4,7 @@
 #include "syscall.h"
 
 int main() {
+  printf("I am initproc\n");
   int64_t f = fork();
   int exit_code = 0;
   int64_t pid;

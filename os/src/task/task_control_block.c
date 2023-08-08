@@ -60,6 +60,7 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
   uint64_t entry_point;
 
   s->pid = pid_alloc();
+  info("new pid is %d\n", s->pid);
   s->memory_set.page_table = s->pid;
 
   info("map from elf begin\n");
@@ -68,7 +69,12 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
                       &entry_point);
 
   info("map from elf over\n");
+  
+  nkapi_activate(s->pid);
 
+  uint64_t* temp = 0;
+  info("data is %lx\n", *(temp));
+  nkapi_activate(0);
   s->trap_cx_ppn = memory_set_translate(
       &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT));
   info("trap context ppn of [%d] is 0x%llx\n", s->pid, s->trap_cx_ppn);
