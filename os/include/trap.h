@@ -7,7 +7,6 @@ typedef struct {
   uint64_t x[32];
   uint64_t sstatus;
   uint64_t sepc;
-  uint64_t kernel_satp;
   uint64_t kernel_sp;
   uint64_t trap_handler;
 } TrapContext;

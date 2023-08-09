@@ -12,7 +12,6 @@ void app_init_context(uint64_t entry, uint64_t sp, uint64_t kernel_satp,
   }
   c->sstatus = sstatus;
   c->sepc = entry;
-  c->kernel_satp = kernel_satp;
   c->kernel_sp = kernel_sp;
   c->trap_handler = trap_handler;
   c->x[2] = sp;

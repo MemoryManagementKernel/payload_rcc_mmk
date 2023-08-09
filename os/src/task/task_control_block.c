@@ -70,11 +70,12 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
 
   info("map from elf over\n");
   
-  nkapi_activate(s->pid);
+  // nkapi_activate(s->pid);
 
-  uint64_t* temp = 0;
-  info("data is %lx\n", *(temp));
-  nkapi_activate(0);
+  // uint64_t* temp = 0;
+  // info("data is %lx\n", *(temp));
+  // nkapi_activate(0);
+
   s->trap_cx_ppn = memory_set_translate(
       &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT));
   info("trap context ppn of [%d] is 0x%llx\n", s->pid, s->trap_cx_ppn);
@@ -146,13 +147,18 @@ void task_control_block_exec(TaskControlBlock *s, uint8_t *elf_data,
 TaskControlBlock *task_control_block_fork(TaskControlBlock *parent) {
   TaskControlBlock *s = (TaskControlBlock *)bd_malloc(sizeof(TaskControlBlock));
 
+  //Yan_ice: temporarily modify pid here (maybe cause error)
+  s->pid = pid_alloc();
+  s->memory_set.page_table = s->pid;
+
+  printf("alloc pid: %d\n",s->pid);
   // copy user space (include trap context)
   memory_set_from_existed_user(&s->memory_set, &parent->memory_set);
   s->trap_cx_ppn = memory_set_translate(
       &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT));
 
   // alloc a pid and a kernel stack in kernel space
-  s->pid = pid_alloc();
+
   kernel_stack_new(&s->kernel_stack, s->pid);
   uint64_t kernel_stack_top = kernel_stack_get_top(&s->kernel_stack);
 

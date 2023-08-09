@@ -77,7 +77,7 @@ static void map_area_copy_data(MapArea *map_area, PtHandle pt, uint8_t *data,
 }
 
 static void memory_set_new_bare(MemorySet *memory_set) {
-  info("pid new here\n");
+  info("pid new here: %d\n", memory_set->page_table);
   nkapi_pt_init(memory_set->page_table, 0);
   vector_new(&memory_set->areas, sizeof(MapArea));
 }
@@ -309,8 +309,9 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
 void memory_set_from_existed_user(MemorySet *memory_set,
                                   MemorySet *user_space) {
 
+  printf("from existed user: %d\n", memory_set->page_table);
   memory_set_new_bare(memory_set);
-
+  printf("from existed user after.\n");
   // map trampoline
   memory_set_map_trampoline(memory_set);
 
