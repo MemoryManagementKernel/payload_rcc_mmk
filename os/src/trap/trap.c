@@ -14,9 +14,7 @@ static void trap_from_kernel_interrupt(uint64_t cause) {
     timer_set_next_trigger();
     break;
   case SupervisorExternal:
-    info("external interrupt\n");
     irq = plic_claim();
-    info("external interrupt irq=%d\n", irq);
     if (irq == VIRTIO0_IRQ) {
       virtio_disk_intr();
     } else if (irq) {

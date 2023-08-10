@@ -207,7 +207,6 @@ int64_t sys_fork() {
 
   // add new task to scheduler
   task_manager_add_task(new_task);
-  printf("fork finished.\n");
   return (int64_t)new_pid;
 }
 

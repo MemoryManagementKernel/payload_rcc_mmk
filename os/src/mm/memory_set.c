@@ -373,7 +373,7 @@ void memory_set_from_existed_user(MemorySet *memory_set,
        if(status!=0){
         panic("nkapi translate 2 failed.\n");
       }
-      printf("writing from ppn to ppn: %lx %lx\n",src_ppn, dst_ppn);
+      //printf("writing from ppn to ppn: %lx %lx\n",src_ppn, dst_ppn);
       
       memcpy(ppn_get_bytes_array(dst_ppn), ppn_get_bytes_array(src_ppn),
             PAGE_SIZE);

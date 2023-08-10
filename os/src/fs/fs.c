@@ -14,7 +14,13 @@ int64_t stdin_read(char *buf, uint64_t len) {
     if (c == 0) {
       task_suspend_current_and_run_next();
       continue;
-    } else {
+
+      //Yan_ice: to let shell work, temporarily suspend when read -1 (EOF).
+      //This may cause error when read other things!
+      //TODO: please let shell ignore input when read -1.
+    
+    //else{
+    } else if (c != -1){
       break;
     }
   }

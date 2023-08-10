@@ -63,13 +63,9 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
   info("new pid is %d\n", s->pid);
   s->memory_set.page_table = s->pid;
 
-  info("map from elf begin\n");
-
   memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp,
                       &entry_point);
 
-  info("map from elf over\n");
-  
   // nkapi_activate(s->pid);
 
   // uint64_t* temp = 0;
@@ -96,16 +92,16 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
   // prepare TrapContext in user space
   // identical mapping, so directly set trap context in physical address
   TrapContext *trap_cx = task_control_block_get_trap_cx(s);
-  info("task control block start address is 0x%llx\n", &s);
+  //info("task control block start address is 0x%llx\n", &s);
   // info("task control block kernel stack address is 0x%llx\n", &(s->kernel_stack));
   // info("task control block end address is 0x%llx\n", &(s->stride));
-  info("trap context address is 0x%llx\n", trap_cx);
+  //info("trap context address is 0x%llx\n", trap_cx);
   // panic("stop here\n");
 
   app_init_context(entry_point, user_sp, kernel_space_id(), kernel_stack_top,
                    (uint64_t)trap_handler, trap_cx);
   // panic("stop here\n");
-  info("entry point: %lx\n",entry_point);
+  //info("entry point: %lx\n",entry_point);
   memset(s->fd_table, 0, MAX_FILE_NUM * sizeof(File *));
   memset(&s->mailbox, 0, sizeof(Mailbox));
 
@@ -151,7 +147,7 @@ TaskControlBlock *task_control_block_fork(TaskControlBlock *parent) {
   s->pid = pid_alloc();
   s->memory_set.page_table = s->pid;
 
-  printf("tcb fork pid: %d\n",s->pid);
+  //printf("tcb fork pid: %d\n",s->pid);
   // copy user space (include trap context)
   memory_set_from_existed_user(&s->memory_set, &parent->memory_set);
   s->trap_cx_ppn = memory_set_translate(
@@ -192,7 +188,6 @@ TaskControlBlock *task_control_block_fork(TaskControlBlock *parent) {
   // prepare TrapContext in user space
   TrapContext *trap_cx = task_control_block_get_trap_cx(s);
   trap_cx->kernel_sp = kernel_stack_top;
-    printf("tcb prepare trap ctx\n");
   return s;
 }
 

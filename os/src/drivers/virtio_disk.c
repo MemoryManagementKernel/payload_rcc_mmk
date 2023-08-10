@@ -201,6 +201,8 @@ void virtio_disk_rw(BlockCache *b, int write) {
   // qemu's virtio-blk.c reads them.
   struct virtio_blk_req *buf0 = &disk.ops[idx[0]];
 
+  info("virtio_disk_rw\n");
+
   if (write)
     buf0->type = VIRTIO_BLK_T_OUT; // write the disk
   else
@@ -247,14 +249,11 @@ void virtio_disk_rw(BlockCache *b, int write) {
   // Wait for virtio_disk_intr() to say request has finished.
   BlockCache volatile *_b = b; // Make sure complier will load 'b' form memory
   intr_on();
-  info("virtio_disk_rw 1 \n");
   while (_b->disk) {
     // WARN: No kernel concurrent support, DO NOT allow kernel yield
     // yield();
   }
-      info("virtio_disk_rw 2 \n");
   intr_off();
-    info("virtio_disk_rw 3 \n");
   disk.info[idx[0]].b = 0;
   free_chain(idx[0]);
 }
