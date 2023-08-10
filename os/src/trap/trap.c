@@ -10,10 +10,13 @@ static void trap_from_kernel_interrupt(uint64_t cause) {
   int irq;
   switch (cause) {
   case SupervisorTimer:
+    info("timer interrupt\n");
     timer_set_next_trigger();
     break;
   case SupervisorExternal:
+    info("external interrupt\n");
     irq = plic_claim();
+    info("external interrupt irq=%d\n", irq);
     if (irq == VIRTIO0_IRQ) {
       virtio_disk_intr();
     } else if (irq) {
@@ -47,13 +50,18 @@ void trap_from_kernel() {
   }
 }
 
+
+void signal_handler(){
+  //info("signal handler call.\n");
+} 
+
 void kernelvec();
 
 
 void trap_init() {
   nkapi_config_kernel_delegate_handler((uint64_t)trap_from_kernel);
   nkapi_config_user_delegate_handler((uint64_t)trap_handler);
-
+  nkapi_config_signal_handler((uint64_t)signal_handler);
   w_sie(r_sie() | SIE_SEIE | SIE_SSIE);
 
   //info("test kernel interrupt:\n");
@@ -67,7 +75,7 @@ void trap_enable_timer_interrupt() {
 
 void trap_handler() {
   //intr_off();
-  info("user trap handled\n");
+  //info("user trap handled\n");
   TrapContext *cx = processor_current_trap_cx();
   uint64_t scause = r_scause();
   uint64_t stval = r_stval();
@@ -111,7 +119,6 @@ void trap_handler() {
       break;
     }
   }
-
   //intr_on();
   //trap_return();
 }

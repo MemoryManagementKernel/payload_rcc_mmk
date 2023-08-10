@@ -246,7 +246,6 @@ void virtio_disk_rw(BlockCache *b, int write) {
 
   // Wait for virtio_disk_intr() to say request has finished.
   BlockCache volatile *_b = b; // Make sure complier will load 'b' form memory
-  info("virtio_disk_rw 0 \n");
   intr_on();
   info("virtio_disk_rw 1 \n");
   while (_b->disk) {

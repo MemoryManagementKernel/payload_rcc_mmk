@@ -151,7 +151,7 @@ TaskControlBlock *task_control_block_fork(TaskControlBlock *parent) {
   s->pid = pid_alloc();
   s->memory_set.page_table = s->pid;
 
-  printf("alloc pid: %d\n",s->pid);
+  printf("tcb fork pid: %d\n",s->pid);
   // copy user space (include trap context)
   memory_set_from_existed_user(&s->memory_set, &parent->memory_set);
   s->trap_cx_ppn = memory_set_translate(
@@ -185,13 +185,14 @@ TaskControlBlock *task_control_block_fork(TaskControlBlock *parent) {
   s->priority = parent->priority;
   s->stride = parent->stride;
 
+
   // add child
   vector_push(&parent->children, &s);
 
   // prepare TrapContext in user space
   TrapContext *trap_cx = task_control_block_get_trap_cx(s);
   trap_cx->kernel_sp = kernel_stack_top;
-
+    printf("tcb prepare trap ctx\n");
   return s;
 }
 

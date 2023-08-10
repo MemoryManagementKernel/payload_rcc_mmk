@@ -3,6 +3,7 @@
 #include "timer.h"
 
 int64_t syscall(uint64_t syscall_id, uint64_t a0, uint64_t a1, uint64_t a2) {
+  info("syscall handled: %d\n",syscall_id);
   switch (syscall_id) {
   case SYSCALL_DUP:
     return sys_dup(a0);

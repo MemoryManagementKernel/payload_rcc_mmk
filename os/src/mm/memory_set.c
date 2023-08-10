@@ -53,33 +53,40 @@ static void map_area_unmap(MapArea *map_area, PtHandle pt, bool dealloc) {
 //Yan_ice: need to modify
 static void map_area_copy_data(MapArea *map_area, PtHandle pt, uint8_t *data,
                                uint64_t len) {
+
+  info("map area cp data\n");
+  unsigned long before;
+  nkapi_current_pt(&before);
+  info("old pt: %d\n",before);
+  nkapi_activate(pt);
+
   uint64_t start = 0;
   VirtPageNum current_vpn = map_area->vpn_range.l;
+
   for (;;) {
-    uint8_t *src = &data[start];
+    uint8_t *src = data+start;
     uint64_t cpy_len = (len - start >= PAGE_SIZE) ? PAGE_SIZE : (len - start);
     // nkapi_write(pt, current_vpn, src, cpy_len, 0);
     info("need to copy %d\n", cpy_len);
-    nkapi_activate(pt);
-    info("vpn is %d\n", current_vpn);
-    uint64_t current_va = current_vpn * PAGE_SIZE + 0; 
+    
+    PhysPageNum current_ppn;
+    nkapi_translate(pt, current_vpn, 0, &current_ppn);
+    info("target current vpn is %lx, ppn is %lx\n", current_vpn, current_ppn);
+
+    uint64_t current_pa = current_ppn * PAGE_SIZE; 
     for (int i = 0; i < cpy_len; i++){
       // info("write to %lx is %lx\n", current_va + i, *(src + i));
-      *((uint8_t*) (current_va + i)) = *(src + i);      }
-      info("\n");
-      nkapi_activate(0);
+      *((uint8_t*) (current_pa + i)) = *(src + i);      
+    }
+      //nkapi_activate(0);
       start += PAGE_SIZE;
       if (start >= len) {
         break;
       }
       current_vpn += 1;
-    }
-}
+  }
 
-static void memory_set_new_bare(MemorySet *memory_set) {
-  info("pid new here: %d\n", memory_set->page_table);
-  nkapi_pt_init(memory_set->page_table, 0);
-  vector_new(&memory_set->areas, sizeof(MapArea));
+  nkapi_activate(before);
 }
 
 uint64_t memory_set_id(MemorySet *memory_set) {
@@ -132,6 +139,34 @@ void memory_set_free(MemorySet *memory_set) {
   vector_free(&memory_set->areas);
   // page_table_free(&memory_set->page_table);
 }
+
+static void memory_set_new_bare(MemorySet *memory_set) {
+  info("pid new here: %d\n", memory_set->page_table);
+  nkapi_pt_init(memory_set->page_table, 0);
+  vector_new(&memory_set->areas, sizeof(MapArea));
+
+  MapArea map_area;
+  info("mapping memory-mapped registers\n");
+  for (uint64_t i = 0; i < MMIO_NUM; i++) {
+    map_area.vpn_range.l = page_floor((PhysAddr)MMIO[i][0]);
+    map_area.vpn_range.r = page_ceil((PhysAddr)(MMIO[i][0] + MMIO[i][1]));
+    map_area.map_type = MAP_IDENTICAL;
+    map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
+    memory_set_push(memory_set, &map_area, NULL, 0);
+  }
+
+  info("mapping plic\n");
+  map_area.vpn_range.l = page_floor((PhysAddr)PLIC);
+  map_area.vpn_range.r = page_ceil((PhysAddr)(PLIC + 0x400000));
+  map_area.map_type = MAP_IDENTICAL;
+  map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
+  memory_set_push(memory_set, &map_area, NULL, 0);
+
+  //clear the map of the record above (dont copy on fork)
+  vector_new(&memory_set->areas, sizeof(MapArea));
+
+}
+
 
 extern uint8_t stext;
 extern uint8_t etext;
@@ -205,21 +240,24 @@ static void memory_set_new_kernel() {
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
   memory_set_push(memory_set, &map_area, NULL, 0);
 
-  info("mapping memory-mapped registers\n");
-  for (uint64_t i = 0; i < MMIO_NUM; i++) {
-    map_area.vpn_range.l = page_floor((PhysAddr)MMIO[i][0]);
-    map_area.vpn_range.r = page_ceil((PhysAddr)(MMIO[i][0] + MMIO[i][1]));
-    map_area.map_type = MAP_IDENTICAL;
-    map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
-    memory_set_push(memory_set, &map_area, NULL, 0);
-  }
+  //Yan_ice: because this area is not shared any more (we modified)
+  //         This is moved to memory_set new_bare
+  
+  // info("mapping memory-mapped registers\n");
+  // for (uint64_t i = 0; i < MMIO_NUM; i++) {
+  //   map_area.vpn_range.l = page_floor((PhysAddr)MMIO[i][0]);
+  //   map_area.vpn_range.r = page_ceil((PhysAddr)(MMIO[i][0] + MMIO[i][1]));
+  //   map_area.map_type = MAP_IDENTICAL;
+  //   map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
+  //   memory_set_push(memory_set, &map_area, NULL, 0);
+  // }
 
-  info("mapping plic\n");
-  map_area.vpn_range.l = page_floor((PhysAddr)PLIC);
-  map_area.vpn_range.r = page_ceil((PhysAddr)(PLIC + 0x400000));
-  map_area.map_type = MAP_IDENTICAL;
-  map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
-  memory_set_push(memory_set, &map_area, NULL, 0);
+  // info("mapping plic\n");
+  // map_area.vpn_range.l = page_floor((PhysAddr)PLIC);
+  // map_area.vpn_range.r = page_ceil((PhysAddr)(PLIC + 0x400000));
+  // map_area.map_type = MAP_IDENTICAL;
+  // map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
+  // memory_set_push(memory_set, &map_area, NULL, 0);
 }
 
 void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
@@ -306,31 +344,41 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
   *entry_point = elf_header_get_entry(&elf);
 }
 
+
+//user_space is the parent.
 void memory_set_from_existed_user(MemorySet *memory_set,
                                   MemorySet *user_space) {
 
-  printf("from existed user: %d\n", memory_set->page_table);
+  printf("from existed user: %d -> %d\n", 
+  user_space->page_table, memory_set->page_table);
   memory_set_new_bare(memory_set);
-  printf("from existed user after.\n");
   // map trampoline
   memory_set_map_trampoline(memory_set);
 
   // copy data sections / trap_context / user_stack
   MapArea new_area;
   MapArea *x = (MapArea *)(user_space->areas.buffer);
-  PhysPageNum src_ppn;
+  PhysPageNum src_ppn, dst_ppn;
   for (uint64_t i = 0; i < user_space->areas.size; i++) {
     map_area_from_another(&new_area, &x[i]);
     memory_set_push(memory_set, &new_area, NULL, 0);
     // copy data from another space
     for (VirtPageNum vpn = x[i].vpn_range.l; vpn < x[i].vpn_range.r; vpn++) {
       
-      src_ppn = nkapi_translate(user_space->page_table, vpn, 0, &src_ppn);
-      //dst_ppn = nkapi_translate(memory_set->page_table, vpn, 0, &dst_ppn);
-      //memcpy(ppn_get_bytes_array(dst_ppn), ppn_get_bytes_array(src_ppn),
-      //      PAGE_SIZE);
-      nkapi_write(memory_set->page_table, vpn, ppn_get_bytes_array(src_ppn), 
-      PAGE_SIZE, 0);
+      int status = nkapi_translate(user_space->page_table, vpn, 0, &src_ppn);
+      if(status!=0){
+        panic("nkapi translate 1 failed.\n");
+      }
+      status = nkapi_translate(memory_set->page_table, vpn, 0, &dst_ppn);
+       if(status!=0){
+        panic("nkapi translate 2 failed.\n");
+      }
+      printf("writing from ppn to ppn: %lx %lx\n",src_ppn, dst_ppn);
+      
+      memcpy(ppn_get_bytes_array(dst_ppn), ppn_get_bytes_array(src_ppn),
+            PAGE_SIZE);
+      //nkapi_write(memory_set->page_table, vpn, ppn_get_bytes_array(src_ppn), 
+      //PAGE_SIZE, 0);
     }
   }
 }

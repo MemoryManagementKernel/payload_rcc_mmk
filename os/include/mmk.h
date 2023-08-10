@@ -68,6 +68,7 @@ typedef uint64_t MapType;
 #define NKAPI_FORK_PTE 11
 #define NKAPI_TIME 12
 #define NKAPI_DEBUG 13
+#define NKAPI_CURRENT_PT 14
 ///
 ///////////////////////////////////
 
@@ -85,6 +86,8 @@ typedef uint64_t MapType;
 ///////////////////////////////////
 
 int nkapi_time(unsigned long *time);
+int nkapi_current_pt(unsigned long *current_pt);
+
 int nkapi_translate(unsigned long pt_handle, VirtPageNum vpn, unsigned char write, PhysPageNum *ppn);
 int nkapi_translate_va(unsigned long pt_handle, VirtAddr va, PhysAddr *pa);
 int nkapi_get_pte(unsigned long pt_handle, VirtPageNum vpn, unsigned long *pte);

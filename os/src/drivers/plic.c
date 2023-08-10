@@ -3,7 +3,7 @@
 #include "config.h"
 #include "drivers.h"
 #include "riscv.h"
-
+#include "log.h"
 //
 // the riscv Platform Level Interrupt Controller (PLIC).
 //
@@ -23,6 +23,7 @@ void plic_init() {
 // ask the PLIC what interrupt we should serve.
 int plic_claim() {
   int hart = cpuid();
+  printf("plic value: %lx\n",PLIC_SCLAIM(hart));
   int irq = *(uint32_t *)PLIC_SCLAIM(hart);
   return irq;
 }

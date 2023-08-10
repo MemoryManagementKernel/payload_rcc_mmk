@@ -42,6 +42,11 @@ int nkapi_time(unsigned long* time){
 	return mmk_call(NKAPI_TIME,params,5,time);
 }
 
+int nkapi_current_pt(unsigned long* current_pt){
+	unsigned long params[5] = {0,0,0,0,0};
+	return mmk_call(NKAPI_CURRENT_PT,params,5,current_pt);
+}
+
 int nkapi_translate(unsigned long pt_handle, VirtPageNum vpn, unsigned char write, PhysPageNum *ppn){
 	unsigned long params[3] = {pt_handle, vpn, (unsigned long)write};
 	return mmk_call(NKAPI_TRANSLATE, params, 3, ppn);
