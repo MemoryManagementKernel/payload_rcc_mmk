@@ -46,24 +46,25 @@ void task_exit_current_and_run_next(int exit_code) {
   // Record exit code
   task->exit_code = exit_code;
   // do not move to its parent but under initproc
-
+  info("exit 0");
   TaskControlBlock **x = (TaskControlBlock **)(task->children.buffer);
   for (uint64_t i = 0; i < task->children.size; i++) {
     x[i]->parent = &INITPROC;
     vector_push(&INITPROC.children, x[i]);
   }
   vector_free(&task->children);
-
   // deallocate user space
   memory_set_recycle_data_pages(&task->memory_set);
-
   // deallocate kernel stack
-  kernel_stack_free(&task->kernel_stack);
 
+  //Yan_ice: temporarily not free kernel stack, it would cause mem leak
+  //kernel_stack_free(&task->kernel_stack);
+  
   // we do not have to save task context
   TaskContext _unused;
   task_context_zero_init(&_unused);
   processor_schedule(&_unused);
+  
 }
 
 MemorySet *task_current_memory_set() {

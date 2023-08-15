@@ -28,8 +28,11 @@ static void map_area_unmap_one(MapArea *map_area, PtHandle pt,
                                VirtPageNum vpn, bool dealloc) {
   if (nkapi_dealloc(pt, vpn)==0)
   {
-    trace("unmap vpn 0x%llx\n", vpn);
+    info("unmap vpn 0x%llx\n", vpn);
+  }else{
+    error("unmap vpn 0x%llx FAILED\n", vpn);
   }
+  asm("li a7,9 \n\t ecall");
 }
 
 static void map_area_map(MapArea *map_area, PtHandle pt) {
@@ -46,18 +49,17 @@ static void map_area_map(MapArea *map_area, PtHandle pt) {
 static void map_area_unmap(MapArea *map_area, PtHandle pt, bool dealloc) {
   for (VirtPageNum vpn = map_area->vpn_range.l; vpn < map_area->vpn_range.r;
        vpn++) {
+    info("unmaping %lx\n",vpn);
     map_area_unmap_one(map_area, pt, vpn, dealloc);
   }
+  info("unmap finish\n");
 }
 
 //Yan_ice: need to modify
 static void map_area_copy_data(MapArea *map_area, PtHandle pt, uint8_t *data,
                                uint64_t len) {
-
-  info("map area cp data\n");
   unsigned long before;
   nkapi_current_pt(&before);
-  info("old pt: %d\n",before);
   nkapi_activate(pt);
 
   uint64_t start = 0;
@@ -67,16 +69,14 @@ static void map_area_copy_data(MapArea *map_area, PtHandle pt, uint8_t *data,
     uint8_t *src = data+start;
     uint64_t cpy_len = (len - start >= PAGE_SIZE) ? PAGE_SIZE : (len - start);
     // nkapi_write(pt, current_vpn, src, cpy_len, 0);
-    info("need to copy %d\n", cpy_len);
+    //info("need to copy %d\n", cpy_len);
     
     PhysPageNum current_ppn;
     nkapi_translate(pt, current_vpn, 0, &current_ppn);
-    info("target current vpn is %lx, ppn is %lx\n", current_vpn, current_ppn);
 
     uint64_t current_pa = current_ppn * PAGE_SIZE; 
     for (int i = 0; i < cpy_len; i++){
-      // info("write to %lx is %lx\n", current_va + i, *(src + i));
-      *((uint8_t*) (current_pa + i)) = *(src + i);      
+     *((uint8_t*) (current_pa + i)) = *(src + i);      
     }
       //nkapi_activate(0);
       start += PAGE_SIZE;
@@ -122,6 +122,7 @@ static void memory_set_remove_area_with_start_vpn(MemorySet *memory_set,
   uint64_t i = 0;
   while (i < memory_set->areas.size) {
     if (x[i].vpn_range.l == start_vpn) {
+      info("remove start from %lx\n", start_vpn);
       map_area_unmap(&x[i], memory_set->page_table, true);
       vector_remove(&memory_set->areas, i);
     } else {
@@ -304,13 +305,7 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
       map_area.map_type = MAP_FRAMED;
       map_area.map_perm = map_perm;
       max_end_vpn = map_area.vpn_range.r;
-      // panic("stop here\n");
-      info("elf map: file %lx -> mem %lx\n",elf_program_get_offset(&elf, ph),
-         map_area.vpn_range.l);
-      for(int i = 0;i<50;i++){
-        printf("%lx ",elf_data[elf_program_get_offset(&elf, ph)+i]);
-      }
-      info("[head]\n");
+
       memory_set_push(memory_set, &map_area,
                       elf_data + elf_program_get_offset(&elf, ph),
                       elf_program_get_filesz(&elf, ph));
@@ -326,13 +321,11 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
   map_area.vpn_range.l = page_floor(user_stack_bottom);
   map_area.vpn_range.r = page_ceil(user_stack_top) + 1;
 
-  info("map usr stack: %llx %llx\n", user_stack_bottom, user_stack_top);
   map_area.map_type = MAP_FRAMED;
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W | MAP_PERM_U;
   memory_set_push(memory_set, &map_area, NULL, 0);
 
-  info("map trap context\n");
-  // map TrapContext
+ // map TrapContext
   map_area.vpn_range.l = page_floor(TRAP_CONTEXT);
   map_area.vpn_range.r = page_ceil(TRAP_CONTEXT) + 1;
   map_area.map_type = MAP_FRAMED;
@@ -373,7 +366,7 @@ void memory_set_from_existed_user(MemorySet *memory_set,
        if(status!=0){
         panic("nkapi translate 2 failed.\n");
       }
-      //printf("writing from ppn to ppn: %lx %lx\n",src_ppn, dst_ppn);
+      printf("writing from ppn to ppn: %lx %lx\n",src_ppn, dst_ppn);
       
       memcpy(ppn_get_bytes_array(dst_ppn), ppn_get_bytes_array(src_ppn),
             PAGE_SIZE);

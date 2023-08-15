@@ -17,7 +17,7 @@ void clear_bss() {
 
 void main() {
   //clear_bss();
-  nkapi_config_allocator_range((unsigned long)&ekernel, 0x88000000);
+  nkapi_config_allocator_range((unsigned long)&ekernel, ((unsigned long)&ekernel) + 0x400000);
 
   info("rcc_mmk init 1.\n");
 
@@ -35,10 +35,6 @@ void main() {
   
   inode_root_init();
 
-  unsigned long val;
-  asm("mv %0, sp"
-  : "=r" (val));
-  info("sp value: %lx \n", val);
   task_init();
 
   // trap_enable_timer_interrupt();
