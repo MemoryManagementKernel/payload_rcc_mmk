@@ -25,18 +25,33 @@
 #define kernel_stack_position_bottom(x)                                        \
   (kernel_stack_position_top(x) - KERNEL_STACK_SIZE)
 
-// clock freq for qemu
-#define CLOCK_FREQ 10000000
-
-// virtio mmio interface
-#define VIRTIO0 0x10001000
 #define VIRTIO0_IRQ 1
 
+#define CLOCK_FREQ 10000000
+
+#define VIRTIO0 0x10001000L
+#define PLIC 0x0c000000L
 #define MMIO_NUM 1
-const static uint64_t MMIO[MMIO_NUM][2] = {{VIRTIO0, 0x1000}};
+const static uint64_t MMIO[MMIO_NUM][2] = {
+  {VIRTIO0, 0x1000},   /* virtIO 0 */
+};
+
+
+// #ifdef BOARD_NEZHA
+// #define VIRTIO0 0x10001000L
+// #define PLIC 0x10000000L
+// #define MMIO_NUM 4
+// const static uint64_t MMIO[MMIO_NUM][2] = {
+//   {PLIC, 0x3000},   /* PLIC     */
+//   {PLIC+200000, 0x1000},   /* PLIC     */
+//   {0x03002000, 0x1000},   /* DMAC     */
+//   {0x04025000, 0x1000},   /* SPI 0    */
+// };
+// #endif 
+
 
 // qemu puts platform-level interrupt controller (PLIC) here
-#define PLIC 0x0c000000L
+
 #define PLIC_PRIORITY (PLIC + 0x0)
 #define PLIC_PENDING (PLIC + 0x1000)
 #define PLIC_MENABLE(hart) (PLIC + 0x2000 + (hart)*0x100)

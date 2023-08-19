@@ -30,9 +30,7 @@ void main() {
   plic_init();
   info("Plic init success.\n");
 
-  //int *c = (int*)0x80300000;
-  //*c = 1;
-  
+
   inode_root_init();
 
   task_init();

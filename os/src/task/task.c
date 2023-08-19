@@ -2,20 +2,59 @@
 #include "fcntl.h"
 #include "fs.h"
 #include "log.h"
+#include "string.h"
 
 static TaskControlBlock INITPROC;
+
+typedef struct _app_name {
+  char name[32];
+} app_name;
+
+extern uint8_t _app_num;
+extern uint64_t _app_data;
+extern app_name _app_names;
+
+
+
+uint64_t mem_load_pgms(char* name, uint8_t* load_data){
+  info("load app from %d apps %p\n", _app_num, &_app_num);
+  for(int a = 0;a<_app_num;a++){
+
+    info("checking app %s\n", (&_app_names)[a]);
+    if( strcmp(name, (&_app_names)+a) == 0 ){
+      uint64_t siz = (&_app_data)[a+1] - (&_app_data)[a];
+      memcpy(load_data, (uint8_t*)((&_app_data)[a]), siz);
+      return siz;
+    }
+  }
+  return 0;
+}
 
 void task_init() {
   pid_allocator_init();
   task_manager_init();
 
   static uint8_t initproc_elf[MAX_APP_SIZE];
-  INITPROC.elf_inode = inode_open_file("initproc", O_RDONLY);
-  if (!INITPROC.elf_inode) {
-    panic("Fail to create initproc\n");
+  uint64_t initproc_elf_size = 0;
+  
+  if(fs_status() == 1){
+    info("loading initproc from fs\n");
+    //load elf from file system.
+    INITPROC.elf_inode = inode_open_file("initproc", O_RDONLY);
+    if (!INITPROC.elf_inode) {
+      panic("Fail to create initproc\n");
+    }
+    initproc_elf_size = inode_read_all(INITPROC.elf_inode, initproc_elf);
+  
+  }else{
+    info("loading initproc from memory\n");
+    //TODO: load elf from memory here.
+    initproc_elf_size = mem_load_pgms("initproc", initproc_elf);
+    if(initproc_elf_size == 0){
+      panic("Fail to load initproc from mem\n");
+    }
   }
-  info("create initproc\n");
-  uint64_t initproc_elf_size = inode_read_all(INITPROC.elf_inode, initproc_elf);
+  
   // panic("unreachable task init\n");
   task_control_block_new(&INITPROC, initproc_elf, initproc_elf_size);
   task_manager_add_task(&INITPROC);

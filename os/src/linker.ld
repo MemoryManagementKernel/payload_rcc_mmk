@@ -45,6 +45,14 @@ SECTIONS
 
   . = ALIGN(4K);
   ebss = .;
+
+  sapps = .;
+  .apps : {
+    *(.apps)
+  }
+
+  . = ALIGN(4K);
+  eapps = .;
   ekernel = .;
 
   /DISCARD/ : {

@@ -32,7 +32,6 @@ static void map_area_unmap_one(MapArea *map_area, PtHandle pt,
   }else{
     error("unmap vpn 0x%llx FAILED\n", vpn);
   }
-  asm("li a7,9 \n\t ecall");
 }
 
 static void map_area_map(MapArea *map_area, PtHandle pt) {
@@ -177,6 +176,8 @@ extern uint8_t sdata;
 extern uint8_t edata;
 extern uint8_t sbss_with_stack;
 extern uint8_t ebss;
+extern uint8_t sapps;
+extern uint8_t eapps;
 extern uint8_t ekernel;
 extern uint8_t strampoline;
 
@@ -202,7 +203,8 @@ static void memory_set_new_kernel() {
   info(".rodata    [0x%llx, 0x%llx)\n", &srodata, &erodata);
   info(".data      [0x%llx, 0x%llx)\n", &sdata, &edata);
   info(".bss       [0x%llx, 0x%llx)\n", &sbss_with_stack, &ebss);
-  info(".physical memory  [0x%llx, 0x%llx)\n", &ekernel, 0x81000000ul);
+  info(".apps      [0x%llx, 0x%llx)\n", &sapps, &eapps);
+  info(".physical memory  [0x%llx, 0x%llx)\n", &ekernel, &ekernel+0x1000000);
 
   MapArea map_area;
 
@@ -230,6 +232,13 @@ static void memory_set_new_kernel() {
   info("mapping .bss section\n");
   map_area.vpn_range.l = page_floor((PhysAddr)&sbss_with_stack);
   map_area.vpn_range.r = page_ceil((PhysAddr)&ebss);
+  map_area.map_type = MAP_IDENTICAL;
+  map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
+  memory_set_push(memory_set, &map_area, NULL, 0);
+
+  info("mapping .app section\n");
+  map_area.vpn_range.l = page_floor((PhysAddr)&sapps);
+  map_area.vpn_range.r = page_ceil((PhysAddr)&eapps);
   map_area.map_type = MAP_IDENTICAL;
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
   memory_set_push(memory_set, &map_area, NULL, 0);
