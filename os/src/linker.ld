@@ -46,13 +46,13 @@ SECTIONS
   . = ALIGN(4K);
   ebss = .;
 
-  sapps = .;
+  /* sapps = .;
   .apps : {
     *(.apps)
   }
 
   . = ALIGN(4K);
-  eapps = .;
+  eapps = .; */
   ekernel = .;
 
   /DISCARD/ : {

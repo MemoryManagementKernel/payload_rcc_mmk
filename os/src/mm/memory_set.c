@@ -203,7 +203,7 @@ static void memory_set_new_kernel() {
   info(".rodata    [0x%llx, 0x%llx)\n", &srodata, &erodata);
   info(".data      [0x%llx, 0x%llx)\n", &sdata, &edata);
   info(".bss       [0x%llx, 0x%llx)\n", &sbss_with_stack, &ebss);
-  info(".apps      [0x%llx, 0x%llx)\n", &sapps, &eapps);
+  // info(".apps      [0x%llx, 0x%llx)\n", &sapps, &eapps);
   info(".physical memory  [0x%llx, 0x%llx)\n", &ekernel, &ekernel+0x1000000);
 
   MapArea map_area;
@@ -236,12 +236,12 @@ static void memory_set_new_kernel() {
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
   memory_set_push(memory_set, &map_area, NULL, 0);
 
-  info("mapping .app section\n");
-  map_area.vpn_range.l = page_floor((PhysAddr)&sapps);
-  map_area.vpn_range.r = page_ceil((PhysAddr)&eapps);
-  map_area.map_type = MAP_IDENTICAL;
-  map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
-  memory_set_push(memory_set, &map_area, NULL, 0);
+  // info("mapping .app section\n");
+  // map_area.vpn_range.l = page_floor((PhysAddr)&sapps);
+  // map_area.vpn_range.r = page_ceil((PhysAddr)&eapps);
+  // map_area.map_type = MAP_IDENTICAL;
+  // map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
+  // memory_set_push(memory_set, &map_area, NULL, 0);
 
   info("mapping physical memory\n");
   map_area.vpn_range.l = page_floor((PhysAddr)&ekernel);
