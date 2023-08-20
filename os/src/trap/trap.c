@@ -61,7 +61,7 @@ void trap_init() {
   nkapi_config_user_delegate_handler((uint64_t)trap_handler);
   nkapi_config_signal_handler((uint64_t)signal_handler);
   w_sie(r_sie() | SIE_SEIE | SIE_SSIE);
-
+  info("trap handler: %x %x\n",(uint64_t)trap_from_kernel, (uint64_t)trap_handler);
   //info("test kernel interrupt:\n");
   //asm("csrr x10,mstatus");
 }
@@ -73,7 +73,6 @@ void trap_enable_timer_interrupt() {
 
 void trap_handler() {
   //intr_off();
-  //info("user trap handled\n");
   TrapContext *cx = processor_current_trap_cx();
   uint64_t scause = r_scause();
   uint64_t stval = r_stval();
@@ -117,8 +116,6 @@ void trap_handler() {
       break;
     }
   }
-  //intr_on();
-  //trap_return();
 }
 
 extern void __alltraps();

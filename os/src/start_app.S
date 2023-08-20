@@ -3,6 +3,9 @@
     .global _app_num
 _app_num:
     .quad 2
+
+    .global _app_datas
+_app_datas:
     .quad app_0 # value defined by "quad" is always 64 bit.
     .quad app_1
     .quad app_1_end

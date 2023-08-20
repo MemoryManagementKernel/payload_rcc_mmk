@@ -63,4 +63,8 @@ int64_t inode_close_file(OSInode *osinode);
 int64_t inode_read(OSInode *osinode, char *buf, uint64_t len);
 int64_t inode_write(OSInode *osinode, char *buf, uint64_t len);
 
+//mem_app.c
+uint64_t mem_load_pgms(char* name, uint8_t* load_data);
+
+
 #endif // _FS_H_

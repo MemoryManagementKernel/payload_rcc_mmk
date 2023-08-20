@@ -13,9 +13,9 @@ static void map_area_from_another(MapArea *map_area, MapArea *another) {
   map_area->map_perm = another->map_perm;
 }
 
-//Yan_ice: need to modify
 static void map_area_map_one(MapArea *map_area, PtHandle pt,
                              VirtPageNum vpn) {
+
   PhysPageNum ppn;
   if (nkapi_alloc(pt, vpn, map_area->map_type, map_area->map_perm, &ppn)==0)
   {
@@ -23,7 +23,6 @@ static void map_area_map_one(MapArea *map_area, PtHandle pt,
   }
 }
 
-//Yan_ice: need to modify
 static void map_area_unmap_one(MapArea *map_area, PtHandle pt,
                                VirtPageNum vpn, bool dealloc) {
   if (nkapi_dealloc(pt, vpn)==0)
@@ -94,6 +93,9 @@ uint64_t memory_set_id(MemorySet *memory_set) {
 
 static void memory_set_push(MemorySet *memory_set, MapArea *map_area,
                             uint8_t *data, uint64_t len) {
+
+  //Yan_ice: add more bits for map permission in map_area
+  map_area->map_perm |= PTE_D | PTE_A | PTE_V;
 
   map_area_map(map_area, memory_set->page_table);
   if (data && len >= 0) {

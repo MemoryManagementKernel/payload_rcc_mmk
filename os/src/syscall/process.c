@@ -189,6 +189,7 @@ int64_t sys_munmap(uint64_t start, uint64_t len) {
 }
 
 int64_t sys_fork() {
+  info("sys_fork \n");
   if (task_manager_almost_full()) {
     return -1;
   }
@@ -211,6 +212,7 @@ int64_t sys_fork() {
 }
 
 int64_t sys_exec(char *path) {
+  info("sys_exec \n");
   char app_name[NAME_LENGTH_LIMIT + 1];
   copy_byte_buffer(processor_current_user_id(), (uint8_t *)app_name,
                    (uint8_t *)path, NAME_LENGTH_LIMIT + 1, FROM_USER);
@@ -218,17 +220,25 @@ int64_t sys_exec(char *path) {
   static uint8_t data[MAX_APP_SIZE];
   size_t size;
   TaskControlBlock *task;
-  OSInode *inode = inode_open_file(app_name, O_RDONLY);
 
-  if (inode) {
-    task = processor_current_task();
-    task->elf_inode = inode;
-    size = inode_read_all(task->elf_inode, data);
-    task_control_block_exec(task, data, size);
-    return 0;
+
+  if (fs_status()) {
+    OSInode *inode = inode_open_file(app_name, O_RDONLY);
+    if(inode){
+      task = processor_current_task();
+      task->elf_inode = inode;
+      size = inode_read_all(task->elf_inode, data);
+      
+    }else{
+      return -1;
+    }
   } else {
-    return -1;
+    task = processor_current_task();
+    //task->elf_inode = NULL;
+    size = mem_load_pgms(app_name, data);
   }
+  task_control_block_exec(task, data, size);
+  return 0;
 }
 
 int64_t sys_mmap(uint64_t start, uint64_t len, uint64_t prot) {

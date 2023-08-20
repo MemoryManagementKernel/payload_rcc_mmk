@@ -12,21 +12,14 @@ void mm_init() {
 int64_t copy_byte_buffer(uint64_t id, uint8_t *kernel, uint8_t *user,
                           uint64_t len, uint64_t direction)
 {
+  PhysAddr user_pa = user;
+  nkapi_translate_va(id,(VirtAddr)user,&user_pa);
 
   if(direction == TO_USER) {
-    VirtPageNum dst = ((uint64_t)user) / PAGE_SIZE;
-    uint64_t offset = ((uint64_t)user) % PAGE_SIZE;
-    //info("copy from kernel to user: %lx -> vpn %lx \n",
-    // (unsigned long)user, dst);
-    memcpy(user, kernel, len);
+    memcpy((uint8_t*)user_pa, kernel, len);
     //nkapi_write(id, dst, kernel, len, offset);
   }else{
-    
-    VirtPageNum dst = ((uint64_t)kernel) / PAGE_SIZE;
-    uint64_t offset = ((uint64_t)kernel) % PAGE_SIZE;
-    //info("copy from usr to kernel: %lx -> ppn %lx \n",
-    // (unsigned long)user, dst);
-    memcpy(kernel, user, len);
+     memcpy(kernel, (uint8_t*)user_pa, len);
     //nkapi_write(0, dst, user, len, offset);
   }
   return len;
