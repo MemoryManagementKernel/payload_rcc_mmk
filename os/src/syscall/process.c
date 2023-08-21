@@ -191,6 +191,7 @@ int64_t sys_munmap(uint64_t start, uint64_t len) {
 int64_t sys_fork() {
   info("sys_fork \n");
   if (task_manager_almost_full()) {
+    info("task manager full\n");
     return -1;
   }
 
@@ -248,7 +249,7 @@ int64_t sys_mmap(uint64_t start, uint64_t len, uint64_t prot) {
 
 int64_t sys_waitpid(int64_t pid, int *exit_code_ptr) {
   TaskControlBlock *task = processor_current_task();
-
+  info("I want to wait pid %d\n", pid);
   // find a child process
   bool found = false;
   uint64_t found_idx;
@@ -277,6 +278,7 @@ int64_t sys_waitpid(int64_t pid, int *exit_code_ptr) {
                      (uint8_t *)exit_code_ptr, sizeof(int), TO_USER);
     return (int64_t)found_pid;
   } else {
+    info("here\n");
     return -2;
   }
 }

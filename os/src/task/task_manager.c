@@ -1,14 +1,19 @@
 #include "string.h"
 #include "task.h"
+#include "log.h"
 
 TaskManager TASK_MANAGER;
 
 void task_manager_init() {
+  TASK_MANAGER.tail = 0;
+  TASK_MANAGER.head = 0;
   memset(TASK_MANAGER.ready_queue, 0,
          MAX_TASK_NUM * sizeof(TaskControlBlock *));
 }
 
 bool task_manager_almost_full() {
+  info("tail is %d\n", TASK_MANAGER.tail);
+  info("head is %d\n", TASK_MANAGER.head);
   return (TASK_MANAGER.tail - TASK_MANAGER.head >= MAX_TASK_NUM - 1);
 }
 

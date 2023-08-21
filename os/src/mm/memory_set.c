@@ -34,12 +34,9 @@ static void map_area_unmap_one(MapArea *map_area, PtHandle pt,
 }
 
 static void map_area_map(MapArea *map_area, PtHandle pt) {
-  if(pt == 1){
-    // panic("1\n");
-  }
+
   for (VirtPageNum vpn = map_area->vpn_range.l; vpn < map_area->vpn_range.r;
        vpn++) {
-    
     map_area_map_one(map_area, pt, vpn);
   }
 }
@@ -356,23 +353,23 @@ void memory_set_from_existed_user(MemorySet *memory_set,
   printf("from existed user: %d -> %d\n", 
   user_space->page_table, memory_set->page_table);
   memory_set_new_bare(memory_set);
-  // map trampoline
-  memory_set_map_trampoline(memory_set);
 
   // copy data sections / trap_context / user_stack
   MapArea new_area;
   MapArea *x = (MapArea *)(user_space->areas.buffer);
-  PhysPageNum src_ppn, dst_ppn;
+  PhysPageNum src_ppn = 1;
+  PhysPageNum dst_ppn = 2;
   for (uint64_t i = 0; i < user_space->areas.size; i++) {
     map_area_from_another(&new_area, &x[i]);
     memory_set_push(memory_set, &new_area, NULL, 0);
     // copy data from another space
     for (VirtPageNum vpn = x[i].vpn_range.l; vpn < x[i].vpn_range.r; vpn++) {
-      
+      printf("user is %d\n", user_space->page_table);
       int status = nkapi_translate(user_space->page_table, vpn, 0, &src_ppn);
       if(status!=0){
         panic("nkapi translate 1 failed.\n");
       }
+      printf("new is %d\n", memory_set->page_table);
       status = nkapi_translate(memory_set->page_table, vpn, 0, &dst_ppn);
        if(status!=0){
         panic("nkapi translate 2 failed.\n");

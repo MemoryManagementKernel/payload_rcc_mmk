@@ -42,9 +42,9 @@ typedef uint16_t MapPermission;
 
 typedef uint64_t MapType;
 
-#define MAP_IDENTICAL 0xfffffffffffffffeul
-#define MAP_FRAMED 0xfffffffffffffffdul
-#define MAP_RAW 0xfffffffffffffffcul
+#define MAP_IDENTICAL 0xfffffffffffffffe
+#define MAP_FRAMED 0xfffffffffffffffd
+#define MAP_RAW 0xfffffffffffffffc
 #define MAP_SPECIFIED(x) ((uint64_t)x)
 
 
