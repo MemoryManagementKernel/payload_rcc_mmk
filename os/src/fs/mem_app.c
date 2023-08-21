@@ -2,24 +2,30 @@
 #include "fs.h"
 #include "log.h"
 
-typedef struct _app_name {
+typedef struct  {
   char name[32];
 } app_name;
 
 extern uint64_t _app_num;
-extern app_name _app_names;
+extern uint64_t _app_names;
 extern uint64_t _app_datas;
 
 
 uint64_t mem_load_pgms(char* name, uint8_t* load_data){
-  info("load app from %d apps\n", _app_num, &_app_num);
+  info("load %s app from %d apps\n", name, _app_num);
+  uint8_t* temp = (uint8_t *)&_app_names;
   for(int a = 0;a<_app_num;a++){
-    info("checking app %s\n", (&_app_names)[a]);
-    if( strcmp(name, (&_app_names)+a) == 0 ){
-      uint64_t siz = (&_app_datas)[a+1] - (&_app_datas)[a];
-      memcpy(load_data, (uint8_t*)((&_app_datas)[a]), siz);
+    info("checking app %s\n", (char*) temp);
+    if(strcmp(name, (char*) temp) == 0 ){
+      uint64_t* si = &_app_datas;
+      uint64_t siz = si[a+1] - si[a];
+      info("address end is %lx\n", si[a + 1]);
+      info("address begin is %lx\n", si[a]);
+      memcpy(load_data, (uint8_t*)si[a], siz);
+      info("find app\n");
       return siz;
     }
+    temp += (strlen((char *)temp) + 1);
   }
   info("app not found.\n");
   return 0;

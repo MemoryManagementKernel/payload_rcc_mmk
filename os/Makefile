@@ -21,7 +21,12 @@ $(shell mkdir -p $(DST_DIR))
 # Source
 SRC = $(wildcard src/*.c src/*.S src/*/*.c src/*/*.S)
 OBJ = $(addprefix $(DST_DIR)/, $(addsuffix .o, $(basename $(SRC))))
-LINKER_SCRIPT = $(WORK_DIR)/src/linker.ld
+
+ifeq ($(BOARD), qemu)
+	LINKER_SCRIPT = $(WORK_DIR)/src/linker-qemu.ld
+else ifeq ($(BOARD), nezha)
+	LINKER_SCRIPT = $(WORK_DIR)/src/linker-nezha.ld
+endif
 
 # Image (todo)
 FS_IMG = $(USER_DIR)/fs.img

@@ -134,18 +134,18 @@ static void memory_set_remove_area_with_start_vpn(MemorySet *memory_set,
 }
 
 void memory_set_free(MemorySet *memory_set) {
-  nkapi_pt_destroy(memory_set->page_table);
-  // MapArea *x = (MapArea *)(memory_set->areas.buffer);
-  // for (uint64_t i = 0; i < memory_set->areas.size; i++) {
-  //   map_area_unmap(&x[i], &memory_set->page_table, false);
-  // }
+  // nkapi_pt_destroy(memory_set->page_table);
+  MapArea *x = (MapArea *)(memory_set->areas.buffer);
+  for (uint64_t i = 0; i < memory_set->areas.size; i++) {
+    map_area_unmap(&x[i], &memory_set->page_table, false);
+  }
   vector_free(&memory_set->areas);
   // page_table_free(&memory_set->page_table);
 }
 
-static void memory_set_new_bare(MemorySet *memory_set) {
+static void memory_set_new_bare(MemorySet *memory_set, uint8_t clear) {
   info("pid new here: %d\n", memory_set->page_table);
-  nkapi_pt_init(memory_set->page_table, 0);
+  nkapi_pt_init(memory_set->page_table, clear);
   vector_new(&memory_set->areas, sizeof(MapArea));
 
   MapArea map_area;
@@ -197,7 +197,7 @@ static MemorySet KERNEL_SPACE;
 static void memory_set_new_kernel() {
   MemorySet *memory_set = &KERNEL_SPACE;
   memory_set->page_table = 0;
-  memory_set_new_bare(memory_set);
+  memory_set_new_bare(memory_set, 0);
 
   // map trampoline
   memory_set_map_trampoline(memory_set);
@@ -276,9 +276,9 @@ static void memory_set_new_kernel() {
 
 void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
                          size_t elf_size, uint64_t *user_sp,
-                         uint64_t *entry_point) {
+                         uint64_t *entry_point, uint8_t clear) {
 
-  memory_set_new_bare(memory_set);
+  memory_set_new_bare(memory_set, clear);
 
   // map trampoline
   // memory_set_map_trampoline(memory_set);
@@ -361,7 +361,7 @@ void memory_set_from_existed_user(MemorySet *memory_set,
 
   printf("from existed user: %d -> %d\n", 
   user_space->page_table, memory_set->page_table);
-  memory_set_new_bare(memory_set);
+  memory_set_new_bare(memory_set, 0);
 
   // copy data sections / trap_context / user_stack
   MapArea new_area;

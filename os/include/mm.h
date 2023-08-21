@@ -102,7 +102,7 @@ uint64_t memory_set_token(MemorySet *memory_set);
 void memory_set_free(MemorySet *memory_set);
 void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
                          size_t elf_size, uint64_t *user_sp,
-                         uint64_t *entry_point);
+                         uint64_t *entry_point, uint8_t clear);
 void memory_set_from_existed_user(MemorySet *memory_set, MemorySet *user_space);
 void memory_set_kernel_init();
 PhysPageNum memory_set_translate(MemorySet *memory_set, VirtPageNum vpn);

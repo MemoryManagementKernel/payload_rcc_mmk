@@ -64,7 +64,7 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
   s->memory_set.page_table = s->pid;
 
   memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp,
-                      &entry_point);
+                      &entry_point, 0);
 
   // nkapi_activate(s->pid);
 
@@ -123,11 +123,12 @@ void task_control_block_exec(TaskControlBlock *s, uint8_t *elf_data,
   // memory_set with elf program headers/trampoline/trap context/user stack
   uint64_t user_sp;
   uint64_t entry_point;
+  info("exec new task\n");
   memory_set_free(&s->memory_set);
 
   // substitute memory_set
   memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp,
-                      &entry_point);
+                      &entry_point, 1);
 
   // update trap_cx ppn
   s->trap_cx_ppn = memory_set_translate(
@@ -201,7 +202,7 @@ TaskControlBlock *task_control_block_spawn(TaskControlBlock *parent,
 
   // new memory_set
   memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp,
-                      &entry_point);
+                      &entry_point, 1);
 
   // alloc a pid and a kernel stack in kernel space
   s->pid = pid_alloc();

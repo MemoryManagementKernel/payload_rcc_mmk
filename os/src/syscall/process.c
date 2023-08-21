@@ -237,6 +237,7 @@ int64_t sys_exec(char *path) {
     task = processor_current_task();
     //task->elf_inode = NULL;
     size = mem_load_pgms(app_name, data);
+    info("mem over\n");
   }
   task_control_block_exec(task, data, size);
   return 0;

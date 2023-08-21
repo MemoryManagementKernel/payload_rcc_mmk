@@ -34,6 +34,7 @@ void trap_from_kernel() {
   uint64_t scause = r_scause();
   uint64_t sstatus = r_sstatus();
   uint64_t stval = r_stval();
+  uint64_t sepc = r_sepc();
   
   if ((sstatus & SSTATUS_SPP) == 0)
     panic("kernel trap: not from supervisor mode\n");
@@ -43,8 +44,8 @@ void trap_from_kernel() {
           scause, stval);
     trap_from_kernel_interrupt(scause & 0xff);
   } else {
-    panic("invalid kernel trap: scause = 0x%llx stval = 0x%llx\n",
-          scause, stval);
+    panic("invalid kernel trap: scause = 0x%llx stval = 0x%llx sepc = 0x%llx\n",
+          scause, stval, sepc);
   }
 }
 

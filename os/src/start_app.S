@@ -12,25 +12,21 @@ _app_datas:
 
     .global _app_names
 _app_names:
-    .string "initproc"
-    .align 5
     .string "user_shell"
-    .align 5
-    .string "NO MORE"
+    .string "initproc"
 
     .section .data
     .global app_0
     .global app_0_end
 app_0:
-    .incbin "../user/build/initproc.elf"
-    .align 3
+    .incbin "../user/build/user_shell.elf"
 app_0_end:
 
     .section .data
     .global app_1
     .global app_1_end
 app_1:
-    .incbin "../user/build/user_shell.elf"
-    .align 3
+    .incbin "../user/build/initproc.elf"
 app_1_end:
+
 
