@@ -21,6 +21,6 @@ uint64_t mem_load_pgms(char* name, uint8_t* load_data){
       return siz;
     }
   }
-
+  info("app not found.\n");
   return 0;
 }

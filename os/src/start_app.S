@@ -13,7 +13,10 @@ _app_datas:
     .global _app_names
 _app_names:
     .string "initproc"
+    .align 5
     .string "user_shell"
+    .align 5
+    .string "NO MORE"
 
     .section .data
     .global app_0

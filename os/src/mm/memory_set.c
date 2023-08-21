@@ -147,7 +147,6 @@ static void memory_set_new_bare(MemorySet *memory_set) {
   info("pid new here: %d\n", memory_set->page_table);
   nkapi_pt_init(memory_set->page_table, 0);
   vector_new(&memory_set->areas, sizeof(MapArea));
-  nkapi_print_pt(memory_set->page_table,0,0x100);
 
   MapArea map_area;
   for (uint64_t i = 0; i < MMIO_NUM; i++) {
@@ -373,15 +372,16 @@ void memory_set_from_existed_user(MemorySet *memory_set,
     map_area_from_another(&new_area, &x[i]);
     // copy data from another space
     for (VirtPageNum vpn = x[i].vpn_range.l; vpn < x[i].vpn_range.r; vpn++) {
+      
       int status = nkapi_translate(user_space->page_table, vpn, 0, &src_ppn);
       if(status!=0){
-        panic("nkapi translate 1 failed.\n");
+        panic("nkapi translate 0 failed.\n");
       }
       status = nkapi_fork_pte(user_space->page_table,memory_set->page_table,vpn, 0, &dst_ppn);
        if(status!=0){
-        panic("nkapi translate 2 failed.\n");
+        panic("nkapi fork failed.\n");
       }
-      printf("fork from ppn to ppn: %lx %lx\n",src_ppn, dst_ppn);
+      printf("fork vpn %lx (from ppn to ppn: %lx %lx)\n", vpn, src_ppn, dst_ppn);
       memory_set_insert_tracker(memory_set, &new_area);
     }
   }
