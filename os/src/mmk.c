@@ -65,7 +65,11 @@ int nkapi_fork_pte(unsigned long pt_handle, VirtPageNum vpn, unsigned char cow, 
 	unsigned long params[3] = {pt_handle, vpn, (unsigned long)cow};
 	return mmk_call(NKAPI_FORK_PTE, params, 3, ppn);
 }
-
+int nkapi_print_pt(unsigned long pt_handle, unsigned long from, unsigned long to){
+	unsigned long abort;
+	unsigned long params[3] = {pt_handle, from, to};
+	return mmk_call(NKAPI_DEBUG, params, 3, &abort);
+}
 
 int nkapi_alloc(unsigned long pt_handle, VirtPageNum vpn, 
 	MapType map_type, MapPermission map_perm, PhysPageNum *ppn){

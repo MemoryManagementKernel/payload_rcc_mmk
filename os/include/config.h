@@ -12,7 +12,7 @@
 #define PAGE_SHIFT 12
 
 #define TRAMPOLINE (UINT64_MAX - 2 * PAGE_SIZE + 1)
-#define TRAP_CONTEXT (0x7fffe000ul)
+#define TRAP_CONTEXT (0xffffe000ul)
 
 #define APP_BASE_ADDRESS 0x80400000
 #define APP_SIZE_LIMIT 0x20000

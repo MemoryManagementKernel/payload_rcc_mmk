@@ -88,6 +88,10 @@ uint64_t memory_set_id(MemorySet *memory_set) {
   return memory_set->page_table;
 }
 
+static void memory_set_insert_tracker(MemorySet *memory_set, MapArea *map_area) {
+  vector_push(&memory_set->areas, map_area);
+}
+
 static void memory_set_push(MemorySet *memory_set, MapArea *map_area,
                             uint8_t *data, uint64_t len) {
 
@@ -98,7 +102,7 @@ static void memory_set_push(MemorySet *memory_set, MapArea *map_area,
   if (data && len >= 0) {
     map_area_copy_data(map_area, memory_set->page_table, data, len);
   }
-  vector_push(&memory_set->areas, map_area);
+  memory_set_insert_tracker(memory_set,map_area);
 }
 
 // Assume that no conflicts.
@@ -143,10 +147,11 @@ static void memory_set_new_bare(MemorySet *memory_set) {
   info("pid new here: %d\n", memory_set->page_table);
   nkapi_pt_init(memory_set->page_table, 0);
   vector_new(&memory_set->areas, sizeof(MapArea));
+  nkapi_print_pt(memory_set->page_table,0,0x100);
 
   MapArea map_area;
-  info("mapping memory-mapped registers\n");
   for (uint64_t i = 0; i < MMIO_NUM; i++) {
+    info("mapping memory-mapped registers - %x \n",MMIO[i][0]);
     map_area.vpn_range.l = page_floor((PhysAddr)MMIO[i][0]);
     map_area.vpn_range.r = page_ceil((PhysAddr)(MMIO[i][0] + MMIO[i][1]));
     map_area.map_type = MAP_IDENTICAL;
@@ -161,6 +166,7 @@ static void memory_set_new_bare(MemorySet *memory_set) {
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
   memory_set_push(memory_set, &map_area, NULL, 0);
 
+  info("create pagetable success\n");
   //clear the map of the record above (dont copy on fork)
   vector_new(&memory_set->areas, sizeof(MapArea));
 
@@ -340,6 +346,10 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
   memory_set_push(memory_set, &map_area, NULL, 0);
 
+  PhysAddr pa;
+  nkapi_translate_va(memory_set->page_table,TRAP_CONTEXT,&pa);
+  info("trapctx pa is: %x\n", pa);
+  
   // return
   *user_sp = (uint64_t)user_stack_top;
   *entry_point = elf_header_get_entry(&elf);
@@ -357,29 +367,25 @@ void memory_set_from_existed_user(MemorySet *memory_set,
   // copy data sections / trap_context / user_stack
   MapArea new_area;
   MapArea *x = (MapArea *)(user_space->areas.buffer);
-  PhysPageNum src_ppn = 1;
-  PhysPageNum dst_ppn = 2;
+  PhysPageNum src_ppn;
+  PhysPageNum dst_ppn;
   for (uint64_t i = 0; i < user_space->areas.size; i++) {
     map_area_from_another(&new_area, &x[i]);
-    memory_set_push(memory_set, &new_area, NULL, 0);
     // copy data from another space
     for (VirtPageNum vpn = x[i].vpn_range.l; vpn < x[i].vpn_range.r; vpn++) {
-      printf("user is %d\n", user_space->page_table);
+      printf("==========\n");
+      printf("forking vpn: %lx\n",vpn);
       int status = nkapi_translate(user_space->page_table, vpn, 0, &src_ppn);
       if(status!=0){
         panic("nkapi translate 1 failed.\n");
       }
-      printf("new is %d\n", memory_set->page_table);
-      status = nkapi_translate(memory_set->page_table, vpn, 0, &dst_ppn);
+      printf("fork from ppn: %lx\n",src_ppn);
+      status = nkapi_fork_pte(user_space->page_table,memory_set->page_table,vpn,&dst_ppn);
        if(status!=0){
         panic("nkapi translate 2 failed.\n");
       }
-      printf("writing from ppn to ppn: %lx %lx\n",src_ppn, dst_ppn);
-      
-      memcpy(ppn_get_bytes_array(dst_ppn), ppn_get_bytes_array(src_ppn),
-            PAGE_SIZE);
-      //nkapi_write(memory_set->page_table, vpn, ppn_get_bytes_array(src_ppn), 
-      //PAGE_SIZE, 0);
+      printf("fork to ppn: %lx\n",dst_ppn);
+      memory_set_insert_tracker(memory_set, &new_area);
     }
   }
 }
