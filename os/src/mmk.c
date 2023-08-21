@@ -61,9 +61,10 @@ int nkapi_get_pte(unsigned long pt_handle, VirtPageNum vpn, unsigned long *pte){
 	unsigned long params[2] = {pt_handle, vpn};
 	return mmk_call(NKAPI_GET_PTE, params, 2, pte);
 }
-int nkapi_fork_pte(unsigned long pt_handle, VirtPageNum vpn, unsigned char cow, PhysPageNum *ppn){
-	unsigned long params[3] = {pt_handle, vpn, (unsigned long)cow};
-	return mmk_call(NKAPI_FORK_PTE, params, 3, ppn);
+int nkapi_fork_pte(unsigned long pt_handle, unsigned long pt_child,
+						VirtPageNum vpn, unsigned char cow, PhysPageNum *ppn){
+	unsigned long params[3] = {pt_handle, pt_child, vpn, (unsigned long)cow};
+	return mmk_call(NKAPI_FORK_PTE, params, 4, ppn);
 }
 int nkapi_print_pt(unsigned long pt_handle, unsigned long from, unsigned long to){
 	unsigned long abort;

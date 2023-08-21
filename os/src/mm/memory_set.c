@@ -373,18 +373,15 @@ void memory_set_from_existed_user(MemorySet *memory_set,
     map_area_from_another(&new_area, &x[i]);
     // copy data from another space
     for (VirtPageNum vpn = x[i].vpn_range.l; vpn < x[i].vpn_range.r; vpn++) {
-      printf("==========\n");
-      printf("forking vpn: %lx\n",vpn);
       int status = nkapi_translate(user_space->page_table, vpn, 0, &src_ppn);
       if(status!=0){
         panic("nkapi translate 1 failed.\n");
       }
-      printf("fork from ppn: %lx\n",src_ppn);
-      status = nkapi_fork_pte(user_space->page_table,memory_set->page_table,vpn,&dst_ppn);
+      status = nkapi_fork_pte(user_space->page_table,memory_set->page_table,vpn, 0, &dst_ppn);
        if(status!=0){
         panic("nkapi translate 2 failed.\n");
       }
-      printf("fork to ppn: %lx\n",dst_ppn);
+      printf("fork from ppn to ppn: %lx %lx\n",src_ppn, dst_ppn);
       memory_set_insert_tracker(memory_set, &new_area);
     }
   }

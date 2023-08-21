@@ -91,7 +91,7 @@ int nkapi_current_pt(unsigned long *current_pt);
 int nkapi_translate(unsigned long pt_handle, VirtPageNum vpn, unsigned char write, PhysPageNum *ppn);
 int nkapi_translate_va(unsigned long pt_handle, VirtAddr va, PhysAddr *pa);
 int nkapi_get_pte(unsigned long pt_handle, VirtPageNum vpn, unsigned long *pte);
-int nkapi_fork_pte(unsigned long pt_handle, VirtPageNum vpn, unsigned char cow, PhysPageNum *ppn);
+int nkapi_fork_pte(unsigned long pt_handle, unsigned long pt_child, VirtPageNum vpn, unsigned char cow, PhysPageNum *ppn);
 int nkapi_alloc(unsigned long pt_handle, VirtPageNum vpn, 
 	MapType map_type, MapPermission map_perm, PhysPageNum *ppn);
 int nkapi_dealloc(unsigned long pt_handle, VirtPageNum vpn);
