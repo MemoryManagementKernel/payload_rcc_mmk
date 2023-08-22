@@ -123,7 +123,6 @@ void task_control_block_exec(TaskControlBlock *s, uint8_t *elf_data,
   // memory_set with elf program headers/trampoline/trap context/user stack
   uint64_t user_sp;
   uint64_t entry_point;
-  info("exec new task\n");
   memory_set_free(&s->memory_set);
 
   // substitute memory_set

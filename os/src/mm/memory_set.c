@@ -24,10 +24,10 @@ static void map_area_map_one(MapArea *map_area, PtHandle pt,
 }
 
 static void map_area_unmap_one(MapArea *map_area, PtHandle pt,
-                               VirtPageNum vpn, bool dealloc) {
+                               VirtPageNum vpn) {
   if (nkapi_dealloc(pt, vpn)==0)
   {
-    info("unmap vpn 0x%llx\n", vpn);
+    trace("unmap vpn 0x%llx\n", vpn);
   }else{
     error("unmap vpn 0x%llx FAILED\n", vpn);
   }
@@ -41,13 +41,11 @@ static void map_area_map(MapArea *map_area, PtHandle pt) {
   }
 }
 
-static void map_area_unmap(MapArea *map_area, PtHandle pt, bool dealloc) {
+static void map_area_unmap(MapArea *map_area, PtHandle pt) {
   for (VirtPageNum vpn = map_area->vpn_range.l; vpn < map_area->vpn_range.r;
        vpn++) {
-    info("unmaping %lx\n",vpn);
-    map_area_unmap_one(map_area, pt, vpn, dealloc);
+    map_area_unmap_one(map_area, pt, vpn);
   }
-  info("unmap finish\n");
 }
 
 //Yan_ice: need to modify
@@ -125,7 +123,7 @@ static void memory_set_remove_area_with_start_vpn(MemorySet *memory_set,
   while (i < memory_set->areas.size) {
     if (x[i].vpn_range.l == start_vpn) {
       info("remove start from %lx\n", start_vpn);
-      map_area_unmap(&x[i], memory_set->page_table, true);
+      map_area_unmap(&x[i], memory_set->page_table);
       vector_remove(&memory_set->areas, i);
     } else {
       i++;
@@ -134,13 +132,15 @@ static void memory_set_remove_area_with_start_vpn(MemorySet *memory_set,
 }
 
 void memory_set_free(MemorySet *memory_set) {
-  // nkapi_pt_destroy(memory_set->page_table);
+  info("mem free: %d\n",memory_set->page_table);
+  //nkapi_pt_destroy(memory_set->page_table);
   MapArea *x = (MapArea *)(memory_set->areas.buffer);
+  warn("Total area num: %d\n", memory_set->areas.size);
   for (uint64_t i = 0; i < memory_set->areas.size; i++) {
-    map_area_unmap(&x[i], &memory_set->page_table, false);
+    warn("unmap area: %d - %d\n",x[i].vpn_range.l,x[i].vpn_range.r);
+    map_area_unmap(&x[i], memory_set->page_table);
   }
   vector_free(&memory_set->areas);
-  // page_table_free(&memory_set->page_table);
 }
 
 static void memory_set_new_bare(MemorySet *memory_set, uint8_t clear) {
@@ -347,7 +347,7 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
 
   PhysAddr pa;
   nkapi_translate_va(memory_set->page_table,TRAP_CONTEXT,&pa);
-  info("trapctx pa is: %x\n", pa);
+  //info("trapctx pa is: %x\n", pa);
   
   // return
   *user_sp = (uint64_t)user_stack_top;
@@ -359,8 +359,9 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
 void memory_set_from_existed_user(MemorySet *memory_set,
                                   MemorySet *user_space) {
 
-  printf("from existed user: %d -> %d\n", 
-  user_space->page_table, memory_set->page_table);
+  //printf("from existed user: %d -> %d\n", 
+  //  user_space->page_table, memory_set->page_table);
+  
   memory_set_new_bare(memory_set, 0);
 
   // copy data sections / trap_context / user_stack
@@ -381,7 +382,7 @@ void memory_set_from_existed_user(MemorySet *memory_set,
        if(status!=0){
         panic("nkapi fork failed.\n");
       }
-      printf("fork vpn %lx (from ppn to ppn: %lx %lx)\n", vpn, src_ppn, dst_ppn);
+      //printf("fork vpn %lx (from ppn to ppn: %lx %lx)\n", vpn, src_ppn, dst_ppn);
       memory_set_insert_tracker(memory_set, &new_area);
     }
   }
@@ -407,8 +408,13 @@ PhysPageNum memory_set_translate(MemorySet *memory_set, VirtPageNum vpn) {
   return 0;
 }
 
+//would not recycle kernel stack.
 void memory_set_recycle_data_pages(MemorySet *memory_set) {
-  memory_set_free(memory_set);
+  MapArea *x = (MapArea *)(memory_set->areas.buffer);
+  for (uint64_t i = 0; i < memory_set->areas.size; i++) {
+    map_area_unmap(&x[i], memory_set->page_table);
+  }
+  vector_free(&memory_set->areas);
 }
 
 void kernel_space_insert_framed_area(VirtAddr start_va, VirtAddr end_va,
@@ -472,6 +478,7 @@ int64_t memory_set_mmap(MemorySet *memory_set, uint64_t start, uint64_t len,
 }
 
 int64_t memory_set_munmap(MemorySet *memory_set, uint64_t start, uint64_t len) {
+    warn("memory_set_munmap exec\n");
   if (len == 0) {
     return 0;
   }

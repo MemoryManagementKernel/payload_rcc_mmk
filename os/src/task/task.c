@@ -61,7 +61,7 @@ void task_exit_current_and_run_next(int exit_code) {
   // Record exit code
   task->exit_code = exit_code;
   // do not move to its parent but under initproc
-  info("exit 0");
+
   TaskControlBlock **x = (TaskControlBlock **)(task->children.buffer);
   for (uint64_t i = 0; i < task->children.size; i++) {
     x[i]->parent = &INITPROC;

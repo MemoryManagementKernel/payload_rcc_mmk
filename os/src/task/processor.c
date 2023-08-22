@@ -41,8 +41,6 @@ void processor_run_tasks() {
       task->task_status = TASK_STATUS_RUNNING;
       PROCESSOR.current = task;
       nkapi_activate(task->pid);
-      info("before switch: last sp=%lx next sp=%lx \n",
-      idle_task_cx_ptr->sp, next_task_cx_ptr->sp);
       __switch(idle_task_cx_ptr, next_task_cx_ptr);
     }
   }
