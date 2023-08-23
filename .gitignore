@@ -6,4 +6,3 @@ efs-fuse/efs-fuse
 user/efs-fuse
 unixbench/*.o
 unixbench/*.d
-elf/*
