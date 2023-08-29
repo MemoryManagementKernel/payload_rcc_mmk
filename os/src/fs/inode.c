@@ -42,7 +42,7 @@ int inode_root_init() {
 }
 
 int fs_status() {
-  return HAS_FS;
+  return 0;
 }
 
 void inode_list_apps() {

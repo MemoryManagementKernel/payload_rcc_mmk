@@ -17,7 +17,7 @@ _app_names:
     .string "user_shell"
     .string "initproc"
     .string "hello_world"
-    .string "syscall"
+    .string "mmktest"
 
     .global app_0
 app_0:
@@ -33,7 +33,7 @@ app_2:
 
     .global app_3
 app_3:
-    .incbin "../elf/syscall"
+    .incbin "../user/build/mmktest.elf"
 
     .global app_end
 app_end:

@@ -68,7 +68,7 @@ $(USER_LIB): $(USER_LIB_OBJ)
 	$(AR) cr $@ $^
 
 $(BUILD_DIR)/%.elf: $(DST_DIR)/$(APPS_DIR)/%.o
-	$(LD) $(LDFLAGS) $^ $(LIB) -o $@
+	$(LD) $(LDFLAGS) $^ $(LIB) -o $@ /workspace/libmmk/user/src/mmk_syscall.o /workspace/libmmk/user/src/pkcs11.o
 	$(OBJCOPY) $@ --strip-all -O binary $(basename $@).bin
 	$(OBJDUMP) $@ -d > $(basename $@).txt
 
