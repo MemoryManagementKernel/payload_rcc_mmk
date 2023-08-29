@@ -1,0 +1,3 @@
+[submodule "libmmk"]
+	path = libmmk
+	url = https://github.com/MemoryManagementKernel/libmmk.git
