@@ -2,7 +2,7 @@
     .section .data
     .global _app_num
 _app_num:
-    .quad 4
+    .quad 5
 
     .global _app_datas
 _app_datas:
@@ -10,6 +10,7 @@ _app_datas:
     .quad app_1
     .quad app_2
     .quad app_3
+    .quad app_4
     .quad app_end
 
     .global _app_names
@@ -18,6 +19,7 @@ _app_names:
     .string "initproc"
     .string "hello_world"
     .string "mmktest"
+    .string "syscall"
 
     .global app_0
 app_0:
@@ -34,6 +36,10 @@ app_2:
     .global app_3
 app_3:
     .incbin "../user/build/mmktest.elf"
+
+    .global app_4
+app_4:
+    .incbin "../user/build/syscall"
 
     .global app_end
 app_end:
