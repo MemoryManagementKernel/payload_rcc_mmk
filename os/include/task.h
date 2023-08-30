@@ -42,6 +42,7 @@ struct TaskControlBlock {
   KernelStack kernel_stack;
   PhysPageNum trap_cx_ppn;
   uint64_t base_size;
+  uint64_t heap_base;
   TaskContext task_cx;
   TaskStatus task_status;
   MemorySet memory_set;

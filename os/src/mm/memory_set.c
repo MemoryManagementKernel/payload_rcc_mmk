@@ -275,7 +275,7 @@ static void memory_set_new_kernel() {
 }
 
 void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
-                         size_t elf_size, uint64_t *user_sp,
+                         size_t elf_size, uint64_t *user_sp, uint64_t *user_heap,
                          uint64_t *entry_point, uint8_t clear) {
 
   memory_set_new_bare(memory_set, clear);
@@ -325,18 +325,29 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
     }
   }
 
-  // map user stack with U flags
+  // map user heap with U flags
   VirtAddr max_end_va = pn2addr(max_end_vpn);
-  VirtAddr user_stack_bottom = max_end_va;
+  VirtAddr user_heap_bottom = max_end_va;
   // guard page
-  user_stack_bottom += PAGE_SIZE;
-  VirtAddr user_stack_top = user_stack_bottom + USER_STACK_SIZE;
+  user_heap_bottom += PAGE_SIZE;
+  VirtAddr user_heap_top = user_heap_bottom + USER_HEAP_SIZE;
+  map_area.vpn_range.l = page_floor(user_heap_bottom);
+  map_area.vpn_range.r = page_ceil(user_heap_top) + 1;
+
+  map_area.map_type = MAP_FRAMED;
+  map_area.map_perm = MAP_PERM_R | MAP_PERM_W | MAP_PERM_U;
+  memory_set_push(memory_set, &map_area, NULL, 0);
+
+  // map user stack with U flags
+  VirtAddr user_stack_top = TRAP_CONTEXT - PAGE_SIZE*6;
+  VirtAddr user_stack_bottom = user_stack_top - USER_STACK_SIZE;
   map_area.vpn_range.l = page_floor(user_stack_bottom);
   map_area.vpn_range.r = page_ceil(user_stack_top) + 1;
 
   map_area.map_type = MAP_FRAMED;
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W | MAP_PERM_U;
   memory_set_push(memory_set, &map_area, NULL, 0);
+
 
  // map TrapContext
   map_area.vpn_range.l = page_floor(TRAP_CONTEXT);
@@ -351,6 +362,7 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
   
   // return
   *user_sp = (uint64_t)user_stack_top;
+  *user_heap = (uint64_t)user_heap_bottom;
   *entry_point = elf_header_get_entry(&elf);
 }
 

@@ -56,14 +56,14 @@ void task_control_block_dealloc_fd(TaskControlBlock *s) {
 void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
                             size_t elf_size) {
   // memory_set with elf program headers/trampoline/trap context/user stack
-  uint64_t user_sp;
+  uint64_t user_sp, user_heap;
   uint64_t entry_point;
 
   s->pid = pid_alloc();
   info("new pid is %d\n", s->pid);
   s->memory_set.page_table = s->pid;
 
-  memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp,
+  memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp, &user_heap,
                       &entry_point, 0);
 
   // nkapi_activate(s->pid);
@@ -80,7 +80,9 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
   kernel_stack_new(&s->kernel_stack, s->pid);
   uint64_t kernel_stack_top = kernel_stack_get_top(&s->kernel_stack);
   // push a task context which goes to trap_return to the top of kernel stack
-  s->base_size = user_sp;
+  s->base_size = user_heap;
+  s->heap_base = user_heap;
+  
   task_context_goto_trap_return(&s->task_cx, kernel_stack_top);
   s->task_status = TASK_STATUS_READY;
   s->parent = NULL;
@@ -121,12 +123,12 @@ void task_control_block_free(TaskControlBlock *s) {
 void task_control_block_exec(TaskControlBlock *s, uint8_t *elf_data,
                              size_t elf_size) {
   // memory_set with elf program headers/trampoline/trap context/user stack
-  uint64_t user_sp;
+  uint64_t user_sp, user_heap;
   uint64_t entry_point;
   memory_set_free(&s->memory_set);
 
   // substitute memory_set
-  memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp,
+  memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp, &user_heap,
                       &entry_point, 1);
 
   // update trap_cx ppn
@@ -159,6 +161,7 @@ TaskControlBlock *task_control_block_fork(TaskControlBlock *parent) {
   uint64_t kernel_stack_top = kernel_stack_get_top(&s->kernel_stack);
 
   s->base_size = parent->base_size;
+  s->heap_base = parent->heap_base;
   task_context_goto_trap_return(&s->task_cx, kernel_stack_top);
   s->task_status = TASK_STATUS_READY;
   s->parent = parent;
@@ -196,11 +199,11 @@ TaskControlBlock *task_control_block_spawn(TaskControlBlock *parent,
   TaskControlBlock *s = (TaskControlBlock *)bd_malloc(sizeof(TaskControlBlock));
 
   // memory_set with elf program headers/trampoline/trap context/user stack
-  uint64_t user_sp;
+  uint64_t user_sp, user_heap;
   uint64_t entry_point;
 
   // new memory_set
-  memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp,
+  memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp, &user_heap,
                       &entry_point, 1);
 
   // alloc a pid and a kernel stack in kernel space
@@ -218,6 +221,8 @@ TaskControlBlock *task_control_block_spawn(TaskControlBlock *parent,
                    (uint64_t)trap_handler, trap_cx);
 
   s->base_size = parent->base_size;
+  s->heap_base = parent->heap_base;
+
   task_context_goto_trap_return(&s->task_cx, kernel_stack_top);
   s->task_status = TASK_STATUS_READY;
   s->parent = parent;

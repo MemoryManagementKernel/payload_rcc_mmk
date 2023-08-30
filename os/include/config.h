@@ -3,7 +3,9 @@
 
 #include <stdint.h>
 
+
 #define USER_STACK_SIZE (4096 * 2)
+#define USER_HEAP_SIZE (4096 * 8)
 #define KERNEL_STACK_SIZE (4096 * 2)
 #define KERNEL_HEAP_SIZE 0x110000
 #define MEMORY_END 0x84000000
