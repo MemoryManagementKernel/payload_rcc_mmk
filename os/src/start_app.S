@@ -39,7 +39,7 @@ app_3:
 
     .global app_4
 app_4:
-    .incbin "../user/build/syscall"
+    .incbin "../elf/syscall"
 
     .global app_end
 app_end:

@@ -80,8 +80,8 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
   kernel_stack_new(&s->kernel_stack, s->pid);
   uint64_t kernel_stack_top = kernel_stack_get_top(&s->kernel_stack);
   // push a task context which goes to trap_return to the top of kernel stack
-  s->base_size = user_heap;
   s->heap_base = user_heap;
+  s->heap_pt = user_heap;
   
   task_context_goto_trap_return(&s->task_cx, kernel_stack_top);
   s->task_status = TASK_STATUS_READY;
@@ -160,7 +160,7 @@ TaskControlBlock *task_control_block_fork(TaskControlBlock *parent) {
   kernel_stack_new(&s->kernel_stack, s->pid);
   uint64_t kernel_stack_top = kernel_stack_get_top(&s->kernel_stack);
 
-  s->base_size = parent->base_size;
+  s->heap_pt = parent->heap_pt;
   s->heap_base = parent->heap_base;
   task_context_goto_trap_return(&s->task_cx, kernel_stack_top);
   s->task_status = TASK_STATUS_READY;
@@ -220,7 +220,7 @@ TaskControlBlock *task_control_block_spawn(TaskControlBlock *parent,
   app_init_context(entry_point, user_sp, kernel_space_id(), kernel_stack_top,
                    (uint64_t)trap_handler, trap_cx);
 
-  s->base_size = parent->base_size;
+  s->heap_pt = parent->heap_pt;
   s->heap_base = parent->heap_base;
 
   task_context_goto_trap_return(&s->task_cx, kernel_stack_top);

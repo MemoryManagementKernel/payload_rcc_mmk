@@ -360,3 +360,28 @@ int64_t sys_mailwrite(int64_t pid, char *buf, uint64_t len) {
   task->mailbox.write_mails++;
   return len;
 }
+
+int64_t sys_sbrk(uint64_t grow_size, uint64_t is_shrink){
+  info("sys brk\n");
+  TaskControlBlock *temp = processor_current_task();
+  return grow_proc(temp, grow_size);
+}
+
+int64_t sys_brk(uint64_t brk_address) {
+  info("in brk, input arguement is %llx\n", brk_address);
+    uint64_t addr_new = 0;
+    if (brk_address == 0) {
+        addr_new = sys_sbrk(0, 0);
+    }
+    else{
+        TaskControlBlock *temp = processor_current_task();
+        uint64_t former_addr = grow_proc(temp, 0);
+        uint64_t grow_size = (brk_address - former_addr);
+        addr_new = grow_proc(temp, grow_size);
+    }
+
+  PhysAddr* pa;
+  nkapi_translate_va(processor_current_task()->pid, addr_new, pa);
+  info("pa is %lx\n", *pa);    
+  return addr_new;
+}

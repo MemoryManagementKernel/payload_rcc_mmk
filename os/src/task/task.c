@@ -86,3 +86,25 @@ MemorySet *task_current_memory_set() {
   TaskControlBlock *task = processor_take_current_task();
   return &task->memory_set;
 }
+
+uint64_t grow_proc(TaskControlBlock* task, uint64_t lens){
+  info("in grow proc, lens is %lx\n", lens);
+    if (lens > 0) {
+        uint64_t growed_addr = task->heap_pt + lens;
+        uint64_t limit = task->heap_base + USER_HEAP_SIZE;
+        if (growed_addr > limit) {
+            info("process doesn't have enough memsize to grow %llx, %llx, %llx, %llx\n", limit, task->heap_base, growed_addr, task->pid);
+            panic("process heap size boom\n");
+        }
+        task->heap_pt = growed_addr;
+    }
+    else {
+        uint64_t shrinked_addr = task->heap_pt + lens;
+            if (shrinked_addr < task->heap_base) {
+                panic("Memory shrinked to the lowest boundary!\n");
+            }
+            task->heap_pt = shrinked_addr;
+    }
+    info("process heap arguement %llx, %llx\n", task->heap_base, task->heap_pt);
+    return task->heap_base;
+}

@@ -41,8 +41,8 @@ struct TaskControlBlock {
   PidHandle pid;
   KernelStack kernel_stack;
   PhysPageNum trap_cx_ppn;
-  uint64_t base_size;
   uint64_t heap_base;
+  uint64_t heap_pt;
   TaskContext task_cx;
   TaskStatus task_status;
   MemorySet memory_set;
@@ -111,5 +111,7 @@ TaskControlBlock *processor_current_task();
 uint64_t processor_current_user_id();
 TrapContext *processor_current_trap_cx();
 void processor_schedule(TaskContext *switched_task_cx_ptr);
+
+uint64_t grow_proc(TaskControlBlock* task, uint64_t lens);
 
 #endif // _TASK_H_

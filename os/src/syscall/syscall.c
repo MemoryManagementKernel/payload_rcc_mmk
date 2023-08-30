@@ -24,14 +24,24 @@ int64_t syscall(uint64_t syscall_id, uint64_t a0, uint64_t a1, uint64_t a2) {
     return sys_set_priority((int64_t)a0);
   case SYSCALL_GET_TIME:
     return sys_get_time((TimeVal *)a0, (int64_t)a1);
+  case SYSCALL_GETUID:
+    return 0;
   case SYSCALL_GETPID:
     return sys_getpid();
+  case SYSCALL_GETEUID:
+    return 0;
+  case SYSCALL_GETGID:
+    return 0;
+  case SYSCALL_GETEGID:
+    return 0;
   case SYSCALL_MUNMAP:
     return sys_munmap(a0, a1);
   case SYSCALL_FORK:
     return sys_fork();
   case SYSCALL_EXEC:
     return sys_exec((char *)a0);
+  case SYSCALL_BRK:
+    return sys_brk(a0);
   case SYSCALL_MMAP:
     return sys_mmap(a0, a1, a2);
   case SYSCALL_WAITPID:
