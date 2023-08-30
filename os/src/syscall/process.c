@@ -382,6 +382,6 @@ int64_t sys_brk(uint64_t brk_address) {
 
   PhysAddr* pa;
   nkapi_translate_va(processor_current_task()->pid, addr_new, pa);
-  info("pa is %lx\n", *pa);    
+  info("pa is %lx\n", pa);    
   return addr_new;
 }
