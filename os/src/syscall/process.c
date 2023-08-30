@@ -380,8 +380,8 @@ int64_t sys_brk(uint64_t brk_address) {
         addr_new = grow_proc(temp, grow_size);
     }
 
-  PhysAddr* pa;
-  nkapi_translate_va(processor_current_task()->pid, addr_new, pa);
-  info("pa is %lx\n", pa);    
+  // PhysAddr* pa;
+  // nkapi_translate_va(processor_current_task()->pid, addr_new, pa);
+  // info("pa is %lx\n", pa);    
   return addr_new;
 }

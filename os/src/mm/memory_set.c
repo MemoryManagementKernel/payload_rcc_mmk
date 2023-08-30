@@ -137,7 +137,7 @@ void memory_set_free(MemorySet *memory_set) {
   MapArea *x = (MapArea *)(memory_set->areas.buffer);
   warn("Total area num: %d\n", memory_set->areas.size);
   for (uint64_t i = 0; i < memory_set->areas.size; i++) {
-    warn("unmap area: %d - %d\n",x[i].vpn_range.l,x[i].vpn_range.r);
+    warn("unmap area: %llx - %llx\n",x[i].vpn_range.l,x[i].vpn_range.r);
     map_area_unmap(&x[i], memory_set->page_table);
   }
   vector_free(&memory_set->areas);
@@ -147,6 +147,15 @@ static void memory_set_new_bare(MemorySet *memory_set, uint8_t clear) {
   info("pid new here: %d\n", memory_set->page_table);
   nkapi_pt_init(memory_set->page_table, clear);
   vector_new(&memory_set->areas, sizeof(MapArea));
+
+  // info("after new vector: -------------------\n");
+
+  // MapArea *x = (MapArea *)(memory_set->areas.buffer);
+  // for (uint64_t i = 0; i < memory_set->areas.size; i++) {
+  //   info("buddy store map area: %llx - %llx\n",x[i].vpn_range.l,x[i].vpn_range.r);
+  // }
+
+  // info("---------------\n");
 
   MapArea map_area;
   for (uint64_t i = 0; i < MMIO_NUM; i++) {
@@ -167,7 +176,16 @@ static void memory_set_new_bare(MemorySet *memory_set, uint8_t clear) {
 
   info("create pagetable success\n");
   //clear the map of the record above (dont copy on fork)
-  vector_new(&memory_set->areas, sizeof(MapArea));
+  // vector_new(&memory_set->areas, sizeof(MapArea));
+
+  // info("after new vector: -------------------\n");
+
+  // MapArea *y = (MapArea *)(memory_set->areas.buffer);
+  // for (uint64_t i = 0; i < memory_set->areas.size; i++) {
+  //   info("buddy store map area: %llx - %llx\n",y[i].vpn_range.l, y[i].vpn_range.r);
+  // }
+
+  // info("---------------\n");
 
 }
 
@@ -278,6 +296,7 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
                          size_t elf_size, uint64_t *user_sp, uint64_t *user_heap,
                          uint64_t *entry_point, uint8_t clear) {
 
+  // info("I elf\n");
   memory_set_new_bare(memory_set, clear);
 
   // map trampoline
@@ -364,6 +383,17 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
   *user_sp = (uint64_t)user_stack_top;
   *user_heap = (uint64_t)user_heap_bottom;
   *entry_point = elf_header_get_entry(&elf);
+
+  // info("end of from elf\n");
+  // info("after new vector: -------------------\n");
+
+  // MapArea *temp_test = (MapArea *)(memory_set->areas.buffer);
+  // for (uint64_t i = 0; i < memory_set->areas.size; i++) {
+  //   info("buddy store map area: %llx - %llx\n",temp_test[i].vpn_range.l, temp_test[i].vpn_range.r);
+  // }
+
+  // info("---------------\n");
+
 }
 
 
@@ -382,6 +412,10 @@ void memory_set_from_existed_user(MemorySet *memory_set,
   PhysPageNum src_ppn;
   PhysPageNum dst_ppn;
   for (uint64_t i = 0; i < user_space->areas.size; i++) {
+    // JADDYK: hard code the virtual address 
+    if (x[i].vpn_range.l == 0x10001 || x[i].vpn_range.l == 0xc000){
+      continue;
+    }
     map_area_from_another(&new_area, &x[i]);
     // copy data from another space
     for (VirtPageNum vpn = x[i].vpn_range.l; vpn < x[i].vpn_range.r; vpn++) {
@@ -395,8 +429,10 @@ void memory_set_from_existed_user(MemorySet *memory_set,
         panic("nkapi fork failed.\n");
       }
       //printf("fork vpn %lx (from ppn to ppn: %lx %lx)\n", vpn, src_ppn, dst_ppn);
-      memory_set_insert_tracker(memory_set, &new_area);
     }
+
+    memory_set_insert_tracker(memory_set, &new_area);
+
   }
 }
 

@@ -152,14 +152,24 @@ TaskControlBlock *task_control_block_fork(TaskControlBlock *parent) {
   //printf("tcb fork pid: %d\n",s->pid);
   // copy user space (include trap context)
   memory_set_from_existed_user(&s->memory_set, &parent->memory_set);
+
+  // info("leave from existed user\n");
+  // info("after new vector: -------------------\n");
+
+  // MapArea *test_temp = s->memory_set.areas.buffer;
+  // for (uint64_t i = 0; i < s->memory_set.areas.size; i++) {
+  //   info("buddy store map area: %llx - %llx\n",test_temp[i].vpn_range.l, test_temp[i].vpn_range.r);
+  // }
+
+  // info("---------------\n");
+
+
   s->trap_cx_ppn = memory_set_translate(
       &s->memory_set, (VirtPageNum)addr2pn((VirtAddr)TRAP_CONTEXT));
 
   // alloc a pid and a kernel stack in kernel space
-
   kernel_stack_new(&s->kernel_stack, s->pid);
   uint64_t kernel_stack_top = kernel_stack_get_top(&s->kernel_stack);
-
   s->heap_pt = parent->heap_pt;
   s->heap_base = parent->heap_base;
   task_context_goto_trap_return(&s->task_cx, kernel_stack_top);
