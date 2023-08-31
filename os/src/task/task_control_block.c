@@ -62,7 +62,8 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
   s->pid = pid_alloc();
   info("new pid is %d\n", s->pid);
   s->memory_set.page_table = s->pid;
-
+  s->address.clear_child_tid = 0;
+  s->address.set_child_tid = 0;
   memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp, &user_heap,
                       &entry_point, 0);
 
@@ -126,6 +127,8 @@ void task_control_block_exec(TaskControlBlock *s, uint8_t *elf_data,
   uint64_t user_sp, user_heap;
   uint64_t entry_point;
   memory_set_free(&s->memory_set);
+  s->address.clear_child_tid = 0;
+  s->address.set_child_tid = 0;
 
   // substitute memory_set
   memory_set_from_elf(&s->memory_set, elf_data, elf_size, &user_sp, &user_heap,
@@ -148,6 +151,8 @@ TaskControlBlock *task_control_block_fork(TaskControlBlock *parent) {
   //Yan_ice: temporarily modify pid here (maybe cause error)
   s->pid = pid_alloc();
   s->memory_set.page_table = s->pid;
+  s->address.clear_child_tid = 0;
+  s->address.set_child_tid = 0;
 
   //printf("tcb fork pid: %d\n",s->pid);
   // copy user space (include trap context)
@@ -201,6 +206,9 @@ TaskControlBlock *task_control_block_fork(TaskControlBlock *parent) {
   // prepare TrapContext in user space
   TrapContext *trap_cx = task_control_block_get_trap_cx(s);
   trap_cx->kernel_sp = kernel_stack_top;
+
+  s->address.clear_child_tid = parent->address.clear_child_tid;
+  s->address.set_child_tid = parent->address.set_child_tid;
   return s;
 }
 

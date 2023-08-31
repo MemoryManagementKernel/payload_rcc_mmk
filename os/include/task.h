@@ -35,6 +35,12 @@ typedef struct {
   uint64_t s[12];
 } TaskContext;
 
+
+typedef struct {
+    uint64_t set_child_tid;
+    uint64_t clear_child_tid;
+} ProcAddress;
+
 typedef struct TaskControlBlock TaskControlBlock;
 
 struct TaskControlBlock {
@@ -56,6 +62,7 @@ struct TaskControlBlock {
   // stride scheduling
   uint64_t priority;
   uint64_t stride;
+  ProcAddress address;
 };
 
 typedef struct {

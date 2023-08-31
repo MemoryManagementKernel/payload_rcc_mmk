@@ -13,6 +13,7 @@
 #include "timer.h"
 
 int64_t sys_dup(uint64_t fd) {
+  info("[syscall dup]\n");
   TaskControlBlock *task = processor_current_task();
   File *file = task->fd_table[fd];
 
@@ -35,6 +36,7 @@ int64_t sys_dup(uint64_t fd) {
 }
 
 int64_t sys_open(char *path, uint32_t flags) {
+  info("[syscall] open\n");
   TaskControlBlock *task = processor_current_task();
 
   char file_name[NAME_LENGTH_LIMIT + 1];
@@ -55,6 +57,7 @@ int64_t sys_open(char *path, uint32_t flags) {
 }
 
 int64_t sys_close(uint64_t fd) {
+  info("[syscall] close\n");
   TaskControlBlock *task = processor_current_task();
   File *file = task->fd_table[fd];
 
@@ -81,6 +84,7 @@ int64_t sys_close(uint64_t fd) {
 }
 
 int64_t sys_pipe(uint64_t *pipe) {
+  info("[syscall] pipe\n");
   TaskControlBlock *task = processor_current_task();
   uint64_t token = processor_current_user_id();
 
@@ -103,6 +107,7 @@ int64_t sys_pipe(uint64_t *pipe) {
 }
 
 int64_t sys_read(uint64_t fd, char *buf, uint64_t len) {
+  info("[syscall] read\n");
   TaskControlBlock *task = processor_current_task();
   File *file = task->fd_table[fd];
 
@@ -125,6 +130,7 @@ int64_t sys_read(uint64_t fd, char *buf, uint64_t len) {
 }
 
 int64_t sys_write(uint64_t fd, char *buf, uint64_t len) {
+  info("[syscall] write\n");
   TaskControlBlock *task = processor_current_task();
   File *file = task->fd_table[fd];
 
@@ -147,6 +153,7 @@ int64_t sys_write(uint64_t fd, char *buf, uint64_t len) {
 }
 
 int64_t sys_exit(int exit_code) {
+  info("[syscall] exit\n");
   info("Application (pid = %lld) exited with code %d\n",
        processor_current_task()->pid, exit_code);
   //info("Remaining physical pages %lld\n", frame_remaining_pages());
@@ -156,11 +163,13 @@ int64_t sys_exit(int exit_code) {
 }
 
 int64_t sys_yield() {
+  info("[syscall] yield\n");
   task_suspend_current_and_run_next();
   return 0;
 }
 
 int64_t sys_set_priority(int64_t prio) {
+  info("[syscall] priority\n");
   if (prio < 2) {
     return -1;
   }
@@ -169,6 +178,7 @@ int64_t sys_set_priority(int64_t prio) {
 }
 
 int64_t sys_get_time(TimeVal *ts, int64_t tz) {
+  info("[syscall] get time\n");
   TimeVal sys_ts;
   int64_t time_us = timer_get_time_us();
   sys_ts.sec = time_us / USEC_PER_SEC;
@@ -179,17 +189,19 @@ int64_t sys_get_time(TimeVal *ts, int64_t tz) {
 }
 
 int64_t sys_getpid() {
+  info("[syscall] getpid\n");
   TaskControlBlock *task = processor_current_task();
   return (int64_t)task->pid;
 }
 
 int64_t sys_munmap(uint64_t start, uint64_t len) {
+  info("[syscall] munmap\n");
   MemorySet *memory_set = task_current_memory_set();
   return memory_set_munmap(memory_set, start, len);
 }
 
 int64_t sys_fork() {
-  info("sys_fork \n");
+  info("[syscall] fork\n");
   if (task_manager_almost_full()) {
     info("task manager full\n");
     return -1;
@@ -213,7 +225,7 @@ int64_t sys_fork() {
 }
 
 int64_t sys_exec(char *path) {
-  info("sys_exec \n");
+  info("[syscall] exec \n");
   char app_name[NAME_LENGTH_LIMIT + 1];
   copy_byte_buffer(processor_current_user_id(), (uint8_t *)app_name,
                    (uint8_t *)path, NAME_LENGTH_LIMIT + 1, FROM_USER);
@@ -244,11 +256,13 @@ int64_t sys_exec(char *path) {
 }
 
 int64_t sys_mmap(uint64_t start, uint64_t len, uint64_t prot) {
+  info("[syscall] mmap\n");
   MemorySet *memory_set = task_current_memory_set();
   return memory_set_mmap(memory_set, start, len, prot);
 }
 
 int64_t sys_waitpid(int64_t pid, int *exit_code_ptr) {
+  info("[syscall] wait pid\n");
   TaskControlBlock *task = processor_current_task();
   info("I want to wait pid %d\n", pid);
   // find a child process
@@ -285,6 +299,7 @@ int64_t sys_waitpid(int64_t pid, int *exit_code_ptr) {
 }
 
 int64_t sys_spawn(char *path) {
+  info("[syscall] spawn\n");
   if (task_manager_almost_full()) {
     return -1;
   }
@@ -312,6 +327,7 @@ int64_t sys_spawn(char *path) {
 }
 
 int64_t sys_mailread(char *buf, uint64_t len) {
+  info("[syscall] mailread\n");
   TaskControlBlock *task = processor_current_task();
 
   if (task->mailbox.write_mails == task->mailbox.read_mails) {
@@ -337,6 +353,7 @@ int64_t sys_mailread(char *buf, uint64_t len) {
 }
 
 int64_t sys_mailwrite(int64_t pid, char *buf, uint64_t len) {
+  info("[syscall] mailwrite\n");
   TaskControlBlock *task = task_manager_fetch_task_by_pid((uint64_t)pid);
 
   if (task->mailbox.write_mails - task->mailbox.read_mails == MAX_MAIL_NUM) {
@@ -362,13 +379,13 @@ int64_t sys_mailwrite(int64_t pid, char *buf, uint64_t len) {
 }
 
 int64_t sys_sbrk(uint64_t grow_size, uint64_t is_shrink){
-  info("sys brk\n");
+  info("[syscall] sbrk\n");
   TaskControlBlock *temp = processor_current_task();
   return grow_proc(temp, grow_size);
 }
 
 int64_t sys_brk(uint64_t brk_address) {
-  info("in brk, input arguement is %llx\n", brk_address);
+  info("[syscall] brk, input arguement is %llx\n", brk_address);
     uint64_t addr_new = 0;
     if (brk_address == 0) {
         addr_new = sys_sbrk(0, 0);
@@ -384,4 +401,15 @@ int64_t sys_brk(uint64_t brk_address) {
   // nkapi_translate_va(processor_current_task()->pid, addr_new, pa);
   // info("pa is %lx\n", pa);    
   return addr_new;
+}
+
+int64_t sys_gettid() {
+  info("[syscall] get tid\n");
+  return processor_current_task()->pid;
+}
+
+int64_t sys_set_tid_address(uint64_t tid){
+  info("[syscall] set tid address\n");
+  processor_current_task()->address.clear_child_tid = tid;
+  return sys_gettid();
 }

@@ -25,14 +25,18 @@ int64_t syscall(uint64_t syscall_id, uint64_t a0, uint64_t a1, uint64_t a2) {
   case SYSCALL_GET_TIME:
     return sys_get_time((TimeVal *)a0, (int64_t)a1);
   case SYSCALL_GETUID:
+    info("[syscall] getuid\n");
     return 0;
   case SYSCALL_GETPID:
     return sys_getpid();
   case SYSCALL_GETEUID:
+    info("[syscall] geteuid\n");
     return 0;
   case SYSCALL_GETGID:
+    info("[syscall] getgid\n");
     return 0;
   case SYSCALL_GETEGID:
+    info("[syscall] getegid\n");
     return 0;
   case SYSCALL_MUNMAP:
     return sys_munmap(a0, a1);
@@ -52,6 +56,10 @@ int64_t syscall(uint64_t syscall_id, uint64_t a0, uint64_t a1, uint64_t a2) {
     return sys_mailread((char *)a0, a1);
   case SYSCALL_MAILWRITE:
     return sys_mailwrite((int64_t)a0, (char *)a1, a2);
+  case SYSCALL_SET_TID_ADDRESS:
+    return sys_set_tid_address(a0);
+  case SYSCALL_GETTID:
+    return sys_gettid();
   default:
     panic("Unsupported syscall_id: %lld\n", syscall_id);
     break;
