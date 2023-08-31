@@ -1,7 +1,7 @@
 #include "riscv.h"
 #include "trap.h"
 #include "log.h"
-void app_init_context(uint64_t entry, uint64_t sp, uint64_t kernel_satp,
+void app_init_context(uint64_t entry, uint64_t sp, uint64_t tp, uint64_t kernel_satp,
                       uint64_t kernel_sp, uint64_t trap_handler,
                       TrapContext *c) {
   uint64_t sstatus = r_sstatus();
@@ -15,4 +15,5 @@ void app_init_context(uint64_t entry, uint64_t sp, uint64_t kernel_satp,
   c->kernel_sp = kernel_sp;
   c->trap_handler = trap_handler;
   c->x[2] = sp;
+  c->x[4] = tp;
 }
