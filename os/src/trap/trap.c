@@ -101,9 +101,13 @@ void trap_handler() {
     case InstructionPageFault:
     case LoadFault:
     case LoadPageFault:
-      info("Exception %lld in application, bad addr = %llx, bad instruction = "
-           "%llx, core dumped.\n",
-           scause, stval, cx->sepc);
+      asm("li a7, 9 \n\t ecall");
+      PhysAddr pa = 0;
+      nkapi_translate_va(processor_current_user_id(), cx->sepc, &pa);
+      info("Exception %lld in application. ", scause);
+      info("bad addr = %llx, bad instruction addr = "
+           "%llx, bad inst = %lx, core dumped.\n",
+            stval, cx->sepc, *(uint32_t*)pa);
       // page fault exit code
       task_exit_current_and_run_next(-2);
       break;

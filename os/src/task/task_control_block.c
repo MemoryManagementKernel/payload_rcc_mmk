@@ -101,7 +101,7 @@ void task_control_block_new(TaskControlBlock *s, uint8_t *elf_data,
   //info("trap context address is 0x%llx\n", trap_cx);
   // panic("stop here\n");
 
-  app_init_context(entry_point, user_sp, kernel_space_id(), kernel_stack_top,
+  app_init_context(entry_point, user_sp, user_heap, kernel_space_id(), kernel_stack_top,
                    (uint64_t)trap_handler, trap_cx);
   // panic("stop here\n");
   //info("entry point: %lx\n",entry_point);
@@ -141,7 +141,7 @@ void task_control_block_exec(TaskControlBlock *s, uint8_t *elf_data,
   // initialize trap_cx
   TrapContext *trap_cx = task_control_block_get_trap_cx(s);
   uint64_t kernel_stack_top = kernel_stack_get_top(&s->kernel_stack);
-  app_init_context(entry_point, user_sp, kernel_space_id(), kernel_stack_top,
+  app_init_context(entry_point, user_sp, user_heap, kernel_space_id(), kernel_stack_top,
                    (uint64_t)trap_handler, trap_cx);
 }
 
@@ -235,7 +235,7 @@ TaskControlBlock *task_control_block_spawn(TaskControlBlock *parent,
   // initialize trap_cx
   TrapContext *trap_cx = task_control_block_get_trap_cx(s);
   uint64_t kernel_stack_top = kernel_stack_get_top(&s->kernel_stack);
-  app_init_context(entry_point, user_sp, kernel_space_id(), kernel_stack_top,
+  app_init_context(entry_point, user_sp, user_heap, kernel_space_id(), kernel_stack_top,
                    (uint64_t)trap_handler, trap_cx);
 
   s->heap_pt = parent->heap_pt;

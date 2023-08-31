@@ -43,7 +43,7 @@ void trap_enable_timer_interrupt();
 void trap_handler();
 void trap_return();
 
-void app_init_context(uint64_t entry, uint64_t sp, uint64_t kernel_satp,
+void app_init_context(uint64_t entry, uint64_t sp, uint64_t tp, uint64_t kernel_satp,
                       uint64_t kernel_sp, uint64_t trap_handler,
                       TrapContext *c);
 
