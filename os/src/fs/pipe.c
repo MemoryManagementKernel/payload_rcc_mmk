@@ -35,6 +35,7 @@ int64_t pipe_close(Pipe *pipe, bool writable) {
     pipe->read_open = false;
   }
   if (!pipe->read_open && !pipe->write_open) {
+    info("pipe close free\n");
     bd_free(pipe);
   }
   return 0;

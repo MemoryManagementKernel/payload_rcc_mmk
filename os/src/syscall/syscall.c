@@ -28,6 +28,7 @@ int64_t syscall(uint64_t syscall_id, uint64_t a0, uint64_t a1, uint64_t a2) {
     info("[syscall] getuid\n");
     return 0;
   case SYSCALL_GETPID:
+    info("[syscall] getpid\n");
     return sys_getpid();
   case SYSCALL_GETEUID:
     info("[syscall] geteuid\n");

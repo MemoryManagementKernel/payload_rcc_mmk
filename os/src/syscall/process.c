@@ -13,7 +13,7 @@
 #include "timer.h"
 
 int64_t sys_dup(uint64_t fd) {
-  info("[syscall dup]\n");
+  info("[syscall] dup\n");
   TaskControlBlock *task = processor_current_task();
   File *file = task->fd_table[fd];
 
@@ -32,6 +32,7 @@ int64_t sys_dup(uint64_t fd) {
   if (task->fd_table[fd]->type == FD_INODE) {
     task->fd_table[fd]->inode->ref++;
   }
+  info("[syscall] dup over\n");
   return new_fd;
 }
 
@@ -60,6 +61,8 @@ int64_t sys_close(uint64_t fd) {
   info("[syscall] close\n");
   TaskControlBlock *task = processor_current_task();
   File *file = task->fd_table[fd];
+  
+  info("fd %d need to be close\n", fd);
 
   if (fd <= 2 || fd > MAX_FILE_NUM || !file || file->file_ref < 1) {
     return -1;
@@ -69,6 +72,7 @@ int64_t sys_close(uint64_t fd) {
   }
 
   if (file->type == FD_PIPE) {
+    info("[syscall] close type is fd pipe\n");
     pipe_close(file->pipe, file->writable);
   } else if (file->type == FD_INODE) {
     inode_close_file(file->inode);
@@ -80,6 +84,7 @@ int64_t sys_close(uint64_t fd) {
   file->type = FD_NONE;
   file->readable = false;
   file->writable = false;
+  info("[syscall] close over\n");
   return 0;
 }
 
@@ -90,7 +95,7 @@ int64_t sys_pipe(uint64_t *pipe) {
 
   int64_t read_fd = task_control_block_alloc_fd(task);
   int64_t write_fd = task_control_block_alloc_fd(task);
-
+  info("[in kernel] read fd is %d, write fd is %d\n", read_fd, write_fd);
   if (read_fd < 0 || write_fd < 0) {
     return -1;
   }
@@ -99,10 +104,10 @@ int64_t sys_pipe(uint64_t *pipe) {
   File *pipe_write = task->fd_table[write_fd];
   pipe_make(pipe_read, pipe_write);
 
-  copy_byte_buffer(token, (uint8_t *)&read_fd, (uint8_t *)(&pipe[0]),
-                   sizeof(uint64_t), TO_USER);
-  copy_byte_buffer(token, (uint8_t *)&write_fd, (uint8_t *)(&pipe[1]),
-                   sizeof(uint64_t), TO_USER);
+  copy_byte_buffer(token, (uint8_t *)&read_fd, (uint8_t *)(pipe),
+                   sizeof(uint8_t), TO_USER);
+  copy_byte_buffer(token, (uint8_t *)&write_fd, (uint8_t *)((uint32_t *)pipe + 1),
+                   sizeof(uint8_t), TO_USER);
   return 0;
 }
 

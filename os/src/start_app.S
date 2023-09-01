@@ -2,7 +2,7 @@
     .section .data
     .global _app_num
 _app_num:
-    .quad 7
+    .quad 5
 
     .global _app_datas
 _app_datas:
@@ -11,7 +11,6 @@ _app_datas:
     .quad app_2
     .quad app_3
     .quad app_4
-    .quad app_5
     .quad app_end
 
     .global _app_names
@@ -21,7 +20,6 @@ _app_names:
     .string "hello_world"
     .string "mmktest"
     .string "syscall"
-    .string "msyscall"
 
     .global app_0
 app_0:
@@ -41,11 +39,7 @@ app_3:
 
     .global app_4
 app_4:
-    .incbin "../elf/syscall"
-
-    .global app_5
-app_5:
-    .incbin "../user/build/msyscall.elf"    
+    .incbin "../user/build/syscall.elf"
 
     .global app_end
 app_end:
