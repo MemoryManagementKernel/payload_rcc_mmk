@@ -93,10 +93,10 @@ int main(int argc, char *argv[]) {
     // load app data from host file system
     host_file = fopen(argv[i], "rb");
     printf("%s - %s\n", argv[i], app);
-    assert(host_file);
+    assert(host_file,"assert host file");
     fseek(host_file, 0, SEEK_END);
     host_file_size = ftell(host_file);
-    assert(host_file_size <= MAX_APP_SIZE);
+    assert(host_file_size <= MAX_APP_SIZE, "file too big");
     all_data = malloc(host_file_size);
 
     fseek(host_file, 0, SEEK_SET);
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
     fclose(host_file);
 
     // create a file in efs
-    assert(inode_create(root_inode, app, &inode) == 0);
+    assert(inode_create(root_inode, app, &inode) == 0, "inode create failed");
     printf("inode = %ld offset = %ld size = %ld\n", inode.block_id,
            inode.block_offset, host_file_size);
 
