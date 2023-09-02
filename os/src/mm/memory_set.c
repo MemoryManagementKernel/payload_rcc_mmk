@@ -100,6 +100,16 @@ static void memory_set_push(MemorySet *memory_set, MapArea *map_area,
   if (data && len >= 0) {
     map_area_copy_data(map_area, memory_set->page_table, data, len);
   }
+
+  // if((map_area->map_perm & PTE_W) == 0 && (map_area->map_perm & PTE_U) != 0){
+  //   PhysPageNum ppn;
+  //   for (VirtPageNum vpn = map_area->vpn_range.l; vpn < map_area->vpn_range.r;
+  //      vpn++) {
+  //       printf("denying write permission for %lx\n",ppn);
+  //     nkapi_alloc(0,vpn,MAP_IDENTICAL,(map_area->map_perm & !PTE_U), &ppn);
+  //   }
+    
+  // }
   memory_set_insert_tracker(memory_set,map_area);
 }
 
@@ -323,13 +333,13 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
       end_va = (VirtAddr)(start_va + elf_program_get_memsz(&elf, ph));
       map_perm = MAP_PERM_U;
       ph_flags = elf_program_get_flags(&elf, ph);
-      if (ph_flags | PF_R) {
+      if (ph_flags & PF_R) {
         map_perm |= MAP_PERM_R;
       }
-      if (ph_flags | PF_W) {
+      if (ph_flags & PF_W) {
         map_perm |= MAP_PERM_W;
       }
-      if (ph_flags | PF_X) {
+      if (ph_flags & PF_X) {
         map_perm |= MAP_PERM_X;
       }
       map_area.vpn_range.l = page_floor(start_va);
@@ -337,7 +347,6 @@ void memory_set_from_elf(MemorySet *memory_set, uint8_t *elf_data,
       map_area.map_type = MAP_FRAMED;
       map_area.map_perm = map_perm;
       max_end_vpn = map_area.vpn_range.r;
-
       memory_set_push(memory_set, &map_area,
                       elf_data + elf_program_get_offset(&elf, ph),
                       elf_program_get_filesz(&elf, ph));
