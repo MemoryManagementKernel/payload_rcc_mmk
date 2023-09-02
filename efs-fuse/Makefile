@@ -11,7 +11,7 @@ OBJ = $(addprefix $(BUILD_DIR)/, $(addsuffix .o, $(basename $(SRC))))
 CFLAGS = -static -O0 -Wall -g
 INCFLAGS = -I$(WORK_DIR)/../efs/include -I$(WORK_DIR)/../os/include
 
-default: $(TARGET)
+default: # $(TARGET) Yan-ice: no need to build it
 
 $(TARGET): $(OBJ)
 	$(CC) -o $@ $^
