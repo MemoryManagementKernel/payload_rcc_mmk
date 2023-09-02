@@ -38,16 +38,16 @@ int create_fd()
 {
 	int fd[2];
     int pipe_ans = pipe(fd);
-    printf("pipe ans is %d\n", pipe_ans);
-    printf("fd 0 is %d, fd 1 is %d\n", fd[0], fd[1]); 
+    // printf("pipe ans is %d\n", pipe_ans);
+    // printf("fd 0 is %d, fd 1 is %d\n", fd[0], fd[1]); 
     int close_ans = close(fd[1]); 
 
-    printf("close ans is %d\n", close_ans);
+    // printf("close ans is %d\n", close_ans);
 
 	if (pipe_ans != 0 || close_ans != 0)
 	    exit(1);
 
-    printf("fd create over\n");
+    // printf("fd create over\n");
 
 	return fd[0];
 }
@@ -59,16 +59,16 @@ char	*argv[];
     char   *test;
 	int	duration;
 	int	fd;
-    printf("exec syscall test\n");
+    // printf("exec syscall test\n");
     test = "close";
 
 	duration = 10;
 
 	iter = 0;
 	// wake_me(duration, report);
-
     switch (test[0]) {
         case 'm':
+            int start = get_time();
 	        fd = create_fd();
 	        while (1) {
 		        close(dup(fd));
@@ -76,20 +76,32 @@ char	*argv[];
 		        getuid();
 		        umask(022);
 		        iter++;
+                int temp = get_time() - start;
+                if(temp >= 10000){
+                    break;
+                }
 	        }
+            break;
 	    /* NOTREACHED */
         case 'c':
+            int start = get_time();
             fd = create_fd();
             while (1) {
                 close(dup(fd));
                 iter++;
+                int temp = get_time() - start;
+                if(temp >= 10000){
+                    break;
+                }
             }
+            break;
            /* NOTREACHED */
         case 'g':
             while (1) {
                 getpid();
                 iter++;
             }
+            break;
            /* NOTREACHED */
         case 'e':
             while (1) {
@@ -108,9 +120,13 @@ char	*argv[];
                 }
                 iter++;
             }
+            break;
            /* NOTREACHED */
         }
 
-        exit(9);
+    printf("COUNT|%ld|1|lps\n", iter);
+    
+    exit(0);
+
 }
 

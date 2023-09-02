@@ -46,17 +46,20 @@ char	*argv[];
 	duration = 10;
 
 	num[1] = disk;
-
+    
+	int start = get_time();
 	// wake_me(duration, report);
 
-	// while(1) {
-    for (int i = 0; i< 10; i++){
+	while(1) {
 		mov(disk,1,3);
 		iter++;
-        printf("this turn is %d\n", iter);
-	// }
+        int temp = get_time() - start;
+        if(temp >= 10000){
+            break;
+        }
     }
-
+	
+    printf("COUNT|%ld|1|lps\n", iter);
 	exit(0);
 }
 

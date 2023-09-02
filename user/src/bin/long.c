@@ -52,14 +52,16 @@ char	*argv[];
 
 	duration = 10;
 
+
 	/* set up alarm call */
 	iter = 0;	/* init iteration count */
 	// wake_me(duration, report);
 
+    int start = get_time();
+
 	/* this loop will be interrupted by the alarm call */
-	// while (1)
-	// {
-    for (int i = 0; i< 10; i++){
+	while (1)
+	{
         /* in switching to time-based (instead of iteration-based),
            the following statement was added. It should not skew
            the timings too much--there was an increment and test
@@ -72,8 +74,15 @@ char	*argv[];
 	   unused assignments may get optimized out of existence */
 	result = dumb_stuff(result);
 	// }
-    printf("this turn is %d\n", iter);
+    int temp = get_time() - start;
+    if(temp >= 10000){
+        break;
     }
+    }
+
+	printf("COUNT|%ld|1|lps\n", iter);
+	
+	exit(0);
 }
 
 
