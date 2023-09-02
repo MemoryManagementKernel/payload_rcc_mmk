@@ -2,7 +2,7 @@
     .section .data
     .global _app_num
 _app_num:
-    .quad 10
+    .quad 11
 
     .global _app_datas
 _app_datas:
@@ -16,6 +16,7 @@ _app_datas:
     .quad app_7
     .quad app_8
     .quad app_9
+    .quad app_10
     .quad app_end
 
     .global _app_names
@@ -30,6 +31,8 @@ _app_names:
     .string "int"
     .string "long"
     .string "double"
+    .string "hanoi"
+
 
     .global app_0
 app_0:
@@ -70,6 +73,10 @@ app_8:
     .global app_9
 app_9:
     .incbin "../user/build/double.elf"
+
+    .global app_10
+app_10:
+    .incbin "../user/build/hanoi.elf"    
 
     .global app_end
 app_end:

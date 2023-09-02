@@ -420,5 +420,5 @@ int64_t sys_set_tid_address(uint64_t tid){
 }
 
 int64_t umask(int64_t num){
-  return 0
+  return 0;
 }
