@@ -418,3 +418,7 @@ int64_t sys_set_tid_address(uint64_t tid){
   processor_current_task()->address.clear_child_tid = tid;
   return sys_gettid();
 }
+
+int64_t umask(int64_t num){
+  return 0
+}

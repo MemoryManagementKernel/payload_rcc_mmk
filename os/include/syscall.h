@@ -53,5 +53,6 @@ int64_t sys_waitpid(int64_t pid, int *exit_code_ptr);
 int64_t sys_spawn(char *path);
 int64_t sys_mailread(char *buf, uint64_t len);
 int64_t sys_mailwrite(int64_t pid, char *buf, uint64_t len);
+int64_t umask(int64_t num);
 
 #endif // _SYSCALL_H_
