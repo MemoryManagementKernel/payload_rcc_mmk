@@ -205,7 +205,6 @@ char	*argv[];
         case 'm':
 	        fd = create_fd();
 	        // while (1) {
-                dup(fd);
 		        // close(dup(fd));
                 // printf("close over\n");
                 // getpid();
@@ -219,10 +218,15 @@ char	*argv[];
 	    /* NOTREACHED */
         case 'c':
            fd = create_fd();
-           while (1) {
-                close(dup(fd));
+        //    while (1) {
+                int temp = dup(fd);
+                printf("dup ans is %d\n", temp);
+                close(temp);
+                printf("close over\n");
                 iter++;
-           }
+                printf("this term iter is %d\n", iter);
+        //    }
+            break;
            /* NOTREACHED */
         case 'g':
            while (1) {
