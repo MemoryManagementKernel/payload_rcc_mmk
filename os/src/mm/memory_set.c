@@ -142,19 +142,19 @@ static void memory_set_remove_area_with_start_vpn(MemorySet *memory_set,
 }
 
 void memory_set_free(MemorySet *memory_set) {
-  info("mem free: %d\n",memory_set->page_table);
+  // info("mem free: %d\n",memory_set->page_table);
   //nkapi_pt_destroy(memory_set->page_table);
   MapArea *x = (MapArea *)(memory_set->areas.buffer);
-  warn("Total area num: %d\n", memory_set->areas.size);
+  // warn("Total area num: %d\n", memory_set->areas.size);
   for (uint64_t i = 0; i < memory_set->areas.size; i++) {
-    warn("unmap area: %llx - %llx\n",x[i].vpn_range.l,x[i].vpn_range.r);
+    // warn("unmap area: %llx - %llx\n",x[i].vpn_range.l,x[i].vpn_range.r);
     map_area_unmap(&x[i], memory_set->page_table);
   }
   vector_free(&memory_set->areas);
 }
 
 static void memory_set_new_bare(MemorySet *memory_set, uint8_t clear) {
-  info("pid new here: %d\n", memory_set->page_table);
+  // info("pid new here: %d\n", memory_set->page_table);
   nkapi_pt_init(memory_set->page_table, clear);
   vector_new(&memory_set->areas, sizeof(MapArea));
 
@@ -169,7 +169,7 @@ static void memory_set_new_bare(MemorySet *memory_set, uint8_t clear) {
 
   MapArea map_area;
   for (uint64_t i = 0; i < MMIO_NUM; i++) {
-    info("mapping memory-mapped registers - %x \n",MMIO[i][0]);
+    // info("mapping memory-mapped registers - %x \n",MMIO[i][0]);
     map_area.vpn_range.l = page_floor((PhysAddr)MMIO[i][0]);
     map_area.vpn_range.r = page_ceil((PhysAddr)(MMIO[i][0] + MMIO[i][1]));
     map_area.map_type = MAP_IDENTICAL;
@@ -177,14 +177,14 @@ static void memory_set_new_bare(MemorySet *memory_set, uint8_t clear) {
     memory_set_push(memory_set, &map_area, NULL, 0);
   }
 
-  info("mapping plic\n");
+  // info("mapping plic\n");
   map_area.vpn_range.l = page_floor((PhysAddr)PLIC);
   map_area.vpn_range.r = page_ceil((PhysAddr)(PLIC + 0x400000));
   map_area.map_type = MAP_IDENTICAL;
   map_area.map_perm = MAP_PERM_R | MAP_PERM_W;
   memory_set_push(memory_set, &map_area, NULL, 0);
 
-  info("create pagetable success\n");
+  // info("create pagetable success\n");
   //clear the map of the record above (dont copy on fork)
   // vector_new(&memory_set->areas, sizeof(MapArea));
 

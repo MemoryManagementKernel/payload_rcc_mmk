@@ -12,8 +12,8 @@ void task_manager_init() {
 }
 
 bool task_manager_almost_full() {
-  info("tail is %d\n", TASK_MANAGER.tail);
-  info("head is %d\n", TASK_MANAGER.head);
+  // info("tail is %d\n", TASK_MANAGER.tail);
+  // info("head is %d\n", TASK_MANAGER.head);
   return (TASK_MANAGER.tail - TASK_MANAGER.head >= MAX_TASK_NUM - 1);
 }
 

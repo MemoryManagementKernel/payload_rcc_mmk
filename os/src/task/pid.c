@@ -31,7 +31,7 @@ extern MemorySet KERNEL_SPACE;
 void kernel_stack_new(KernelStack *ks, PidHandle pid) {
   uint64_t kernel_stack_bottom = kernel_stack_position_bottom(pid);
   uint64_t kernel_stack_top = kernel_stack_position_top(pid);
-  info("bottom %llx top %llx\n", kernel_stack_bottom, kernel_stack_top);
+  // info("bottom %llx top %llx\n", kernel_stack_bottom, kernel_stack_top);
   kernel_space_insert_framed_area(kernel_stack_bottom, kernel_stack_top,
                                   MAP_PERM_R | MAP_PERM_W);
   ks->pid = pid;

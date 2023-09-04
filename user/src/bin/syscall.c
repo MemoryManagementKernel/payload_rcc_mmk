@@ -59,6 +59,8 @@ char	*argv[];
     char   *test;
 	int	duration;
 	int	fd;
+    int start_time;
+    int temp;
     // printf("exec syscall test\n");
     test = "close";
 
@@ -68,7 +70,7 @@ char	*argv[];
 	// wake_me(duration, report);
     switch (test[0]) {
         case 'm':
-            int start = get_time();
+            start_time = get_time();
 	        fd = create_fd();
 	        while (1) {
 		        close(dup(fd));
@@ -76,7 +78,7 @@ char	*argv[];
 		        getuid();
 		        umask(022);
 		        iter++;
-                int temp = get_time() - start;
+                temp = get_time() - start_time;
                 if(temp >= 10000){
                     break;
                 }
@@ -84,12 +86,12 @@ char	*argv[];
             break;
 	    /* NOTREACHED */
         case 'c':
-            int start = get_time();
+            start_time = get_time();
             fd = create_fd();
             while (1) {
                 close(dup(fd));
                 iter++;
-                int temp = get_time() - start;
+                temp = get_time() - start_time;
                 if(temp >= 10000){
                     break;
                 }
@@ -123,7 +125,6 @@ char	*argv[];
             break;
            /* NOTREACHED */
         }
-
     printf("COUNT|%ld|1|lps\n", iter);
     
     exit(0);
