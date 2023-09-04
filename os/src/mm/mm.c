@@ -17,8 +17,6 @@ int64_t copy_byte_buffer(uint64_t id, uint8_t *kernel, uint8_t *user,
   nkapi_translate_va(id,(VirtAddr)user,&user_pa);
 
   if(direction == TO_USER) {
-    nkapi_print_pt(id, 0, 0x3);
-    info("[copy byte buffer to usr] user pa is %lx %lx\n", user, user_pa);
     memcpy((uint8_t*)user_pa, kernel, len);
     // nkapi_write(id, dst, kernel, len, offset);
   }else{

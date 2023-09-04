@@ -48,9 +48,9 @@ char	*argv[];
 	// wake_me(duration, report);
 	iter = 0;
 
-    for (int i = 0; i< 10; i++){
-	// while (1) {
-        printf("this turn before is %d\n", iter);
+    int start = get_time();
+
+	while (1) {
 		if (write(pvec[1], buf, sizeof(buf)) != sizeof(buf)) {
 			// if ((errno != EINTR) && (errno != 0))
 				// printf("write failed, error \n");
@@ -60,8 +60,13 @@ char	*argv[];
 				// printf("read failed, error %d\n", errno);
 			}
 		iter++;
-        printf("this turn after is %d\n", iter);
-	// }
+	    int temp = get_time() - start;
+    	if(temp >= 10000){
+        	break;
+    	}
     }
+
+	printf("COUNT|%ld|1|lps\n", iter);
+	
     exit(0);
 }

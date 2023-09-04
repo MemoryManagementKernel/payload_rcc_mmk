@@ -44,14 +44,10 @@ char	*argv[];
 
 	iter = 0;
 	// wake_me(duration, report);
-
-    for (int i = 0; i< 20; i++){
-	// while (1) {
+    int start = get_time();
+	while (1) {
 		if ((slave = fork()) == 0) {
 			/* slave .. boring */
-// #if debug
-			printf("fork OK\n");
-// #endif
 			/* kill it right away */
 			exit(0);
 		} else if (slave < 0) {
@@ -66,9 +62,12 @@ char	*argv[];
 			exit(2);
 		}
 		iter++;
-// #if debug
-		printf("Child %d done.\n", slave);
-// #endif
-		// }
-    }
+		int temp = get_time() - start;
+    	if(temp >= 10000){
+        	break;
+    	}
+	}
+
+	printf("COUNT|%ld|1|lps\n", iter);
+	exit(0);
 }
