@@ -17,7 +17,6 @@ int main() {
     while (1) {
       pid = wait(&exit_code);
       if (pid == -1) {
-        printf("father want yield\n");
         yield();
         continue;
       }
